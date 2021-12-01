@@ -56,17 +56,15 @@ def get_numbers_from_string(input_string: str) -> List[int]:
     ([1, 2], []),
     ([1, 2, 3], [6]),
     ([1, 2, 3, 4], [6, 9]),
+    ([1, 2, 3, 4, 5], [6, 9, 12]),
+    ([1, 2, 1, 4, 10, -4], [4, 7, 15, 10]),
 ])
 def test_calculate_sliding_window_sums(input_list, expected_list):
     assert calculate_sliding_window_sums(input_list) == expected_list
 
 
 def calculate_sliding_window_sums(input_list: List[int]) -> List[int]:
-    if len(input_list) == 3:
-        return [sum(input_list)]
-    elif len(input_list) == 4:
-        return [sum(input_list[:3]), sum(input_list[1:])]
-    return []
+    return [sum(input_list[i:i + 3]) for i in range(len(input_list) - 2)]
 
 
 def day_1a(filepath: str) -> int:
@@ -75,5 +73,12 @@ def day_1a(filepath: str) -> int:
     return count_increase(numbers)
 
 
+def day_2a(filepath: str) -> int:
+    with open(filepath, "r") as file:
+        numbers = get_numbers_from_string(file.read())
+    return count_increase(calculate_sliding_window_sums(numbers))
+
+
 if __name__ == "__main__":
     print(f"The answer to 1A is: {day_1a('../puzzle_input/day1.txt')}")
+    print(f"The answer to 2A is: {day_2a('../puzzle_input/day1.txt')}")
