@@ -25,3 +25,30 @@ def count_increase(numbers: List[int]) -> int:
         if numbers[i] < numbers[i+1]:
             count += 1
     return count
+
+
+@pytest.mark.parametrize("input_string, expected_list", [
+    ("", []),
+    ("123", [123]),
+    ("1\n2", [1, 2]),
+    ("\n\n", []),
+    ("1\n2\n", [1, 2]),
+    ("1  \n   2\n3\n4", [1, 2, 3, 4]),
+])
+def test_get_numbers_from_string(input_string, expected_list):
+    assert get_numbers_from_string(input_string) == expected_list
+
+
+def get_numbers_from_string(input_string: str) -> List[int]:
+    if not input_string.split():
+        return []
+
+    result = []
+    input_parsed = input_string.strip().split("\n")
+    for value in input_parsed:
+        result.append(int(value))
+    return result
+
+
+
+
