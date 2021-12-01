@@ -50,5 +50,11 @@ def get_numbers_from_string(input_string: str) -> List[int]:
     return result
 
 
+def day_1a(filepath: str) -> int:
+    with open(filepath, "r") as file:
+        numbers = get_numbers_from_string(file.read())
+    return count_increase(numbers)
 
 
+if __name__ == "__main__":
+    print(f"The answer to 1A is: {day_1a('../puzzle_input/day1.txt')}")
