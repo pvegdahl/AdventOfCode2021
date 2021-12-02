@@ -43,3 +43,30 @@ def sum_by_type(vector_list: List[Tuple[str, int]]) -> Dict[str, int]:
     return result
 
 
+@pytest.mark.parametrize("direction_sums, expected", [
+    ({}, 0),
+    ({"forward": 86}, 0),
+    ({"down": 86}, 86),
+    ({"up": 4}, -4),
+    ({"down": 99, "up": 86}, 13),
+])
+def test_calculate_depth(direction_sums, expected):
+    assert calculate_depth(direction_sums) == expected
+
+
+def calculate_depth(direction_sums: Dict[str, int]) -> int:
+    return (direction_sums.get("down") or 0) - (direction_sums.get("up") or 0)
+
+
+def day_2a(filepath: str) :
+    with open(filepath, "r") as file:
+        vector_list = parse_input(file.read())
+    direction_by_type = sum_by_type(vector_list)
+    horizontal = direction_by_type.get("forward") or 0
+    depth = calculate_depth(direction_by_type)
+    print(f"Horizontal = {horizontal}, Depth = {depth}")
+    return horizontal * depth
+
+
+if __name__ == "__main__":
+    print(f"The answer to 2A is: {day_2a('../puzzle_input/day2.txt')}")
