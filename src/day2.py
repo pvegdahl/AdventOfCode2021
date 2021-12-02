@@ -118,6 +118,25 @@ def update_submarine_state(initial_state: SubmarineState, vector: Tuple[str, int
     )
 
 
+def test_calculate_final_submarine_state():
+    vectors = [
+        ("forward", 5),
+        ("down", 2),
+        ("forward", 5),
+        ("up", 3),
+        ("forward", 5),
+    ]
+
+    assert calculate_final_submarine_state(vectors) == SubmarineState(horizontal=15, depth=5, aim=-1)
+
+
+def calculate_final_submarine_state(vectors: List[Tuple[str, int]]) -> SubmarineState:
+    result = SubmarineState()
+    for vector in vectors:
+        result = update_submarine_state(initial_state=result, vector=vector)
+    return result
+
+
 def day_2a(filepath: str) :
     with open(filepath, "r") as file:
         vector_list = parse_input(file.read())
@@ -128,5 +147,14 @@ def day_2a(filepath: str) :
     return horizontal * depth
 
 
+def day_2b(filepath: str) :
+    with open(filepath, "r") as file:
+        vector_list = parse_input(file.read())
+    final_submarine_state = calculate_final_submarine_state(vector_list)
+    print(f"Horizontal = {final_submarine_state.horizontal}, Depth = {final_submarine_state.depth}")
+    return final_submarine_state.horizontal * final_submarine_state.depth
+
+
 if __name__ == "__main__":
     print(f"The answer to 2A is: {day_2a('../puzzle_input/day2.txt')}")
+    print(f"The answer to 2B is: {day_2b('../puzzle_input/day2.txt')}")
