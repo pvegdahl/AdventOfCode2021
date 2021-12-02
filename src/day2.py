@@ -88,7 +88,13 @@ class SubmarineState(NamedTuple):
     (SubmarineState(), ("down", 0), SubmarineState()),
     (SubmarineState(1, 2, 3), ("down", 0), SubmarineState(1, 2, 3)),
     (SubmarineState(), ("forward", 6), SubmarineState(6, 0, 0)),
+    (SubmarineState(7, 0, 0), ("forward", 6), SubmarineState(13, 0, 0)),
     (SubmarineState(), ("down", 3), SubmarineState(0, 0, 3)),
+    (SubmarineState(8, 7, 6), ("down", 3), SubmarineState(8, 7, 9)),
+    (SubmarineState(8, 7, 6), ("up", 3), SubmarineState(8, 7, 3)),
+    (SubmarineState(7, 0, 2), ("forward", 6), SubmarineState(13, 12, 2)),
+    (SubmarineState(7, 20, 2), ("forward", 6), SubmarineState(13, 32, 2)),
+    (SubmarineState(7, 20, -2), ("forward", 6), SubmarineState(13, 8, -2)),
 ])
 def test_update_submarine_state(initial_state, vector, expected_state):
     assert update_submarine_state(initial_state, vector) == expected_state
@@ -100,12 +106,15 @@ def update_submarine_state(initial_state: SubmarineState, vector: Tuple[str, int
     aim_adjustment = 0
     if vector[0] == "forward":
         horizontal_adjustment = vector[1]
+        depth_adjustment = horizontal_adjustment * initial_state.aim
     if vector[0] == "down":
         aim_adjustment = vector[1]
+    if vector[0] == "up":
+        aim_adjustment = -vector[1]
     return SubmarineState(
-        horizontal=horizontal_adjustment or initial_state.horizontal,
-        depth=depth_adjustment or initial_state.depth,
-        aim=aim_adjustment or initial_state.aim,
+        horizontal=horizontal_adjustment + initial_state.horizontal,
+        depth=depth_adjustment + initial_state.depth,
+        aim=aim_adjustment + initial_state.aim,
     )
 
 
