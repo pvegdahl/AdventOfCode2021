@@ -58,6 +58,26 @@ def calculate_depth(direction_sums: Dict[str, int]) -> int:
     return (direction_sums.get("down") or 0) - (direction_sums.get("up") or 0)
 
 
+@pytest.mark.parametrize("initial_aim, vector, expected_aim", [
+    (0, ("down", 0), 0),
+    (3, ("down", 0), 3),
+    (0, ("down", 5), 5),
+    (3, ("down", 5), 8),
+    (3, ("forward", 5), 3),
+    (3, ("up", 1), 2),
+])
+def test_adjust_aim(initial_aim: int, vector: Tuple[str, int], expected_aim: int):
+    assert adjust_aim(initial_aim, vector) == expected_aim
+
+
+def adjust_aim(initial_aim: int, vector: Tuple[str, int]) -> int:
+    if vector[0] == "down":
+        return initial_aim + vector[1]
+    elif vector[0] == "up":
+        return initial_aim - vector[1]
+    return initial_aim
+
+
 def day_2a(filepath: str) :
     with open(filepath, "r") as file:
         vector_list = parse_input(file.read())
