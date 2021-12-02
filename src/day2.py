@@ -1,4 +1,5 @@
-from typing import Tuple, List
+from collections import defaultdict
+from typing import Tuple, List, Dict
 
 import pytest
 
@@ -25,16 +26,20 @@ def parse_input(input_string: str) -> List[Tuple[str, int]]:
     return result
 
 
-@pytest.mark.parametrize("vector_list, vector_type, expected", [
-    ([], "down", 0),
-    ([("down", 5)], "down", 5),
-    ([("down", 5)], "up", 0),
+@pytest.mark.parametrize("vector_list, expected", [
+    ([], {}),
+    ([("down", 5)], {"down": 5}),
+    ([("up", 3), ("down", 5)], {"down": 5, "up": 3}),
+    ([("up", 3), ("down", 5), ("down", 6)], {"down": 11, "up": 3}),
 ])
-def test_sum_type(vector_list, vector_type, expected):
-    assert sum_type(vector_list, vector_type) == expected
+def test_sum_by_type(vector_list, expected):
+    assert sum_by_type(vector_list) == expected
 
 
-def sum_type(vector_list: List[Tuple[str, int]], vector_type: str) -> int:
-    if vector_list and vector_list[0][0] == vector_type:
-        return vector_list[0][1]
-    return 0
+def sum_by_type(vector_list: List[Tuple[str, int]]) -> Dict[str, int]:
+    result = defaultdict(lambda: 0)
+    for vector in vector_list:
+        result[vector[0]] += vector[1]
+    return result
+
+
