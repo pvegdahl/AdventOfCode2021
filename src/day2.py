@@ -103,9 +103,9 @@ def update_submarine_state(initial_state: SubmarineState, vector: Tuple[str, int
     if vector[0] == "down":
         aim_adjustment = vector[1]
     return SubmarineState(
-        horizontal=initial_state.horizontal + horizontal_adjustment,
-        depth=initial_state.depth + depth_adjustment,
-        aim=initial_state.aim + aim_adjustment
+        horizontal=horizontal_adjustment or initial_state.horizontal,
+        depth=depth_adjustment or initial_state.depth,
+        aim=aim_adjustment or initial_state.aim,
     )
 
 
