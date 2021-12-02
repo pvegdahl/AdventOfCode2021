@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Tuple, List, Dict
+from typing import Tuple, List, Dict, NamedTuple
 
 import pytest
 
@@ -76,6 +76,37 @@ def adjust_aim(initial_aim: int, vector: Tuple[str, int]) -> int:
     elif vector[0] == "up":
         return initial_aim - vector[1]
     return initial_aim
+
+
+class SubmarineState(NamedTuple):
+    horizontal: int = 0
+    depth: int = 0
+    aim: int = 0
+
+
+@pytest.mark.parametrize("initial_state, vector, expected_state", [
+    (SubmarineState(), ("down", 0), SubmarineState()),
+    (SubmarineState(1, 2, 3), ("down", 0), SubmarineState(1, 2, 3)),
+    (SubmarineState(), ("forward", 6), SubmarineState(6, 0, 0)),
+    (SubmarineState(), ("down", 3), SubmarineState(0, 0, 3)),
+])
+def test_update_submarine_state(initial_state, vector, expected_state):
+    assert update_submarine_state(initial_state, vector) == expected_state
+
+
+def update_submarine_state(initial_state: SubmarineState, vector: Tuple[str, int]) -> SubmarineState:
+    horizontal_adjustment = 0
+    depth_adjustment = 0
+    aim_adjustment = 0
+    if vector[0] == "forward":
+        horizontal_adjustment = vector[1]
+    if vector[0] == "down":
+        aim_adjustment = vector[1]
+    return SubmarineState(
+        horizontal=initial_state.horizontal + horizontal_adjustment,
+        depth=initial_state.depth + depth_adjustment,
+        aim=initial_state.aim + aim_adjustment
+    )
 
 
 def day_2a(filepath: str) :
