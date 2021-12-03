@@ -56,6 +56,10 @@ def most_common_bit(binary_input: List[Tuple[int]], position: int) -> int:
     return mode_with_tiebreaker(column)
 
 
+def least_common_bit_with_tiebreaker(data: List[Tuple[int]], position: int) -> int:
+    return 1 - most_common_bit(binary_input=data, position=position)
+
+
 @pytest.mark.parametrize(
     "data, tiebreaker, expected",
     [
@@ -76,7 +80,7 @@ def test_mode_with_tiebreaker(data, tiebreaker, expected):
     assert mode_with_tiebreaker(data, tiebreaker) == expected
 
 
-def mode_with_tiebreaker(data: Tuple[int], tiebreaker: int = 1):
+def mode_with_tiebreaker(data: Tuple[int], tiebreaker: int = 1) -> int:
     other = 1 - tiebreaker
     return mode((tiebreaker, other) + data)
 
@@ -209,6 +213,24 @@ def oxygen_filter_to_one(data: List[Tuple[int]]) -> Tuple[int]:
         data = oxygen_filter(data=data, position=position)
         position += 1
     return data[0]
+
+
+@pytest.mark.parametrize(
+    "data, position, expected",
+    [
+        ([(1,)], 0, []),
+        ([(1, 0), (1, 1)], 0, []),
+        ([(1, 0), (1, 1)], 1, [(1, 0)]),
+        ([(1, 0), (1, 1), (0, 0)], 0, [(0, 0)]),
+    ]
+)
+def test_co2_filter(data, position, expected):
+    assert co2_filter(data, position) == expected
+
+
+def co2_filter(data, position):
+    filter_bit = least_common_bit_with_tiebreaker(data=data, position=position)
+    return [value for value in data if value[position] == filter_bit]
 
 
 def day3a(filepath: str):
