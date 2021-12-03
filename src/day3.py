@@ -1,4 +1,5 @@
 from collections import defaultdict
+from statistics import mode
 from typing import Tuple, List, Dict, NamedTuple
 
 import pytest
@@ -34,6 +35,23 @@ def parse_input(input_string: str) -> List[Tuple[int]]:
     for line in input_string.strip().split("\n"):
         result.append(tuple(int(char) for char in line.strip()))
     return result
+
+
+@pytest.mark.parametrize("binary_input, position, expected_output", [
+    ([(1, 0, 1)], 0, 1),
+    ([(1, 0, 1)], 1, 0),
+    ([(1, 0, 1)], 2, 1),
+    ([(1, 0, 1), (0, 0, 0), (0, 1, 0)], 0, 0),
+    ([(1, 0, 1), (0, 0, 0), (0, 1, 0)], 1, 0),
+    ([(1, 0, 1), (0, 0, 0), (0, 1, 0)], 2, 0),
+])
+def test_most_common_bit(binary_input, position, expected_output):
+    assert most_common_bit(binary_input, position) == expected_output
+
+
+def most_common_bit(binary_input: List[Tuple[int]], position: int) -> int:
+    column = [row[position] for row in binary_input]
+    return mode(column)
 
 
 def day3a(filepath: str):
