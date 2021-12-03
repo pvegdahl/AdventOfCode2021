@@ -1,6 +1,5 @@
-from collections import defaultdict
 from statistics import mode
-from typing import Tuple, List, Dict, NamedTuple
+from typing import Tuple, List
 
 import pytest
 
@@ -53,8 +52,33 @@ def test_most_common_bit(binary_input, position, expected):
 
 
 def most_common_bit(binary_input: List[Tuple[int]], position: int) -> int:
-    column = [row[position] for row in binary_input]
-    return mode(column)
+    column = tuple(row[position] for row in binary_input)
+    return mode_with_tiebreaker(column)
+
+
+@pytest.mark.parametrize(
+    "data, tiebreaker, expected",
+    [
+        ((0,), 1, 0),
+        ((1,), 1, 1),
+        ((1,), 0, 1),
+        ((1, 1), 1, 1),
+        ((1, 1), 0, 1),
+        ((1, 0), 1, 1),
+        ((1, 0), 1, 1),
+        ((0, 1), 1, 1),
+        ((1, 0), 0, 0),
+        ((0, 1), 0, 0),
+        ((0, 0), 1, 0),
+    ],
+)
+def test_mode_with_tiebreaker(data, tiebreaker, expected):
+    assert mode_with_tiebreaker(data, tiebreaker) == expected
+
+
+def mode_with_tiebreaker(data: Tuple[int], tiebreaker: int = 1):
+    other = 1 - tiebreaker
+    return mode((tiebreaker, other) + data)
 
 
 @pytest.mark.parametrize(
@@ -109,14 +133,15 @@ def gamma_rate(most_common_bits: Tuple[int]) -> int:
 
 
 @pytest.mark.parametrize(
-    "most_common_bits, expected", [
+    "most_common_bits, expected",
+    [
         ((0,), 1),
         ((1,), 0),
         ((1, 1), 0),
         ((0, 0), 3),
         ((1, 0, 1, 1, 0), 9),
         ((0, 1, 0, 0, 1), 22),
-    ]
+    ],
 )
 def test_epsilon_rate(most_common_bits, expected):
     assert epsilon_rate(most_common_bits) == expected
@@ -133,7 +158,9 @@ def day3a(filepath: str):
     most_common_bits = most_common_bit_list(binary_input_data)
     print(f"gamma = {gamma_rate(most_common_bits)}")
     print(f"epsilon = {epsilon_rate(most_common_bits)}")
-    print(f"gamma+epsilon = {gamma_rate(most_common_bits) + epsilon_rate(most_common_bits)}")
+    print(
+        f"gamma+epsilon = {gamma_rate(most_common_bits) + epsilon_rate(most_common_bits)}"
+    )
     return gamma_rate(most_common_bits) * epsilon_rate(most_common_bits)
 
 
