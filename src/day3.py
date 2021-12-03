@@ -104,9 +104,37 @@ def binary_to_int(binary_input):
     return result
 
 
+def gamma_rate(most_common_bits: Tuple[int]) -> int:
+    return binary_to_int(most_common_bits)
+
+
+@pytest.mark.parametrize(
+    "most_common_bits, expected", [
+        ((0,), 1),
+        ((1,), 0),
+        ((1, 1), 0),
+        ((0, 0), 3),
+        ((1, 0, 1, 1, 0), 9),
+        ((0, 1, 0, 0, 1), 22),
+    ]
+)
+def test_epsilon_rate(most_common_bits, expected):
+    assert epsilon_rate(most_common_bits) == expected
+
+
+def epsilon_rate(most_common_bits):
+    least_common_bits = tuple(1 - bit for bit in most_common_bits)
+    return binary_to_int(least_common_bits)
+
+
 def day3a(filepath: str):
     with open(filepath, "r") as file:
-        pass
+        binary_input_data = parse_input(file.read())
+    most_common_bits = most_common_bit_list(binary_input_data)
+    print(f"gamma = {gamma_rate(most_common_bits)}")
+    print(f"epsilon = {epsilon_rate(most_common_bits)}")
+    print(f"gamma+epsilon = {gamma_rate(most_common_bits) + epsilon_rate(most_common_bits)}")
+    return gamma_rate(most_common_bits) * epsilon_rate(most_common_bits)
 
 
 def day3b(filepath: str):
