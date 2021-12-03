@@ -174,6 +174,41 @@ def oxygen_filter(data, position):
     return [value for value in data if value[position] == filter_bit]
 
 
+@pytest.mark.parametrize(
+    "data, expected",
+    [
+        ([(1, 0)], (1, 0)),
+        ([(1, 0), (1, 1)], (1, 1)),
+        ([(1, 1), (1, 0)], (1, 1)),
+        (
+            [
+                (0, 0, 1, 0, 0),
+                (1, 1, 1, 1, 0),
+                (1, 0, 1, 1, 0),
+                (1, 0, 1, 1, 1),
+                (1, 0, 1, 0, 1),
+                (0, 1, 1, 1, 1),
+                (0, 0, 1, 1, 1),
+                (1, 1, 1, 0, 0),
+                (1, 0, 0, 0, 0),
+                (1, 1, 0, 0, 1),
+                (0, 0, 0, 1, 0),
+                (0, 1, 0, 1, 0),
+            ],
+            (1, 0, 1, 1, 1),
+        ),
+    ],
+)
+def test_oxygen_filter_to_one(data, expected):
+    assert oxygen_filter_to_one(data) == expected
+
+
+def oxygen_filter_to_one(data: List[Tuple[int]]) -> Tuple[int]:
+    position = 0
+    while len(data) > 1:
+        data = oxygen_filter(data=data, position=position)
+        position += 1
+    return data[0]
 
 
 def day3a(filepath: str):
