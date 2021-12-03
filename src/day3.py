@@ -1,5 +1,5 @@
 from statistics import mode
-from typing import Tuple, List
+from typing import Tuple, List, Callable
 
 import pytest
 
@@ -203,14 +203,16 @@ def oxygen_filter(data, position):
         ),
     ],
 )
-def test_oxygen_filter_to_one(data, expected):
-    assert oxygen_filter_to_one(data) == expected
+def test_filter_to_one(data, expected):
+    assert filter_to_one(data, oxygen_filter) == expected
 
 
-def oxygen_filter_to_one(data: List[Tuple[int]]) -> Tuple[int]:
+def filter_to_one(
+    data: List[Tuple[int]], a_filter: Callable = oxygen_filter
+) -> Tuple[int]:
     position = 0
     while len(data) > 1:
-        data = oxygen_filter(data=data, position=position)
+        data = a_filter(data=data, position=position)
         position += 1
     return data[0]
 
@@ -222,10 +224,29 @@ def oxygen_filter_to_one(data: List[Tuple[int]]) -> Tuple[int]:
         ([(1, 0), (1, 1)], 0, []),
         ([(1, 0), (1, 1)], 1, [(1, 0)]),
         ([(1, 0), (1, 1), (0, 0)], 0, [(0, 0)]),
-    ]
+    ],
 )
 def test_co2_filter(data, position, expected):
     assert co2_filter(data, position) == expected
+
+
+def test_co2_filter_to_one():
+    data = [
+        (0, 0, 1, 0, 0),
+        (1, 1, 1, 1, 0),
+        (1, 0, 1, 1, 0),
+        (1, 0, 1, 1, 1),
+        (1, 0, 1, 0, 1),
+        (0, 1, 1, 1, 1),
+        (0, 0, 1, 1, 1),
+        (1, 1, 1, 0, 0),
+        (1, 0, 0, 0, 0),
+        (1, 1, 0, 0, 1),
+        (0, 0, 0, 1, 0),
+        (0, 1, 0, 1, 0),
+    ]
+    expected = (0, 1, 0, 1, 0)
+    assert filter_to_one(data=data, a_filter=co2_filter) == expected
 
 
 def co2_filter(data, position):
