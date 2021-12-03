@@ -37,14 +37,17 @@ def parse_input(input_string: str) -> List[Tuple[int]]:
     return result
 
 
-@pytest.mark.parametrize("binary_input, position, expected_output", [
-    ([(1, 0, 1)], 0, 1),
-    ([(1, 0, 1)], 1, 0),
-    ([(1, 0, 1)], 2, 1),
-    ([(1, 0, 1), (0, 0, 0), (0, 1, 0)], 0, 0),
-    ([(1, 0, 1), (0, 0, 0), (0, 1, 0)], 1, 0),
-    ([(1, 0, 1), (0, 0, 0), (0, 1, 0)], 2, 0),
-])
+@pytest.mark.parametrize(
+    "binary_input, position, expected_output",
+    [
+        ([(1, 0, 1)], 0, 1),
+        ([(1, 0, 1)], 1, 0),
+        ([(1, 0, 1)], 2, 1),
+        ([(1, 0, 1), (0, 0, 0), (0, 1, 0)], 0, 0),
+        ([(1, 0, 1), (0, 0, 0), (0, 1, 0)], 1, 0),
+        ([(1, 0, 1), (0, 0, 0), (0, 1, 0)], 2, 0),
+    ],
+)
 def test_most_common_bit(binary_input, position, expected_output):
     assert most_common_bit(binary_input, position) == expected_output
 
@@ -52,6 +55,28 @@ def test_most_common_bit(binary_input, position, expected_output):
 def most_common_bit(binary_input: List[Tuple[int]], position: int) -> int:
     column = [row[position] for row in binary_input]
     return mode(column)
+
+
+@pytest.mark.parametrize(
+    "binary_input, expected_output",
+    [
+        ([], tuple()),
+        ([(1, 0, 1)], (1, 0, 1)),
+        ([(1, 0, 1), (1, 1, 1), (1, 1, 1)], (1, 1, 1)),
+        ([(1, 0, 1), (1, 1, 0), (0, 1, 0)], (1, 1, 0)),
+    ],
+)
+def test_most_common_bit_list(binary_input, expected_output):
+    assert most_common_bit_list(binary_input) == expected_output
+
+
+def most_common_bit_list(binary_input: List[Tuple[int]]) -> Tuple[int]:
+    if binary_input:
+        return tuple(
+            most_common_bit(binary_input, position)
+            for position in range(len(binary_input[0]))
+        )
+    return tuple()
 
 
 def day3a(filepath: str):
