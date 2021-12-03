@@ -152,6 +152,30 @@ def epsilon_rate(most_common_bits):
     return binary_to_int(least_common_bits)
 
 
+@pytest.mark.parametrize(
+    "data, position, expected",
+    [
+        ([(1,)], 0, [(1,)]),
+        ([(1, 0), (1, 1)], 0, [(1, 0), (1, 1)]),
+        ([(1, 0), (1, 1), (0, 1)], 0, [(1, 0), (1, 1)]),
+        ([(0, 1), (1, 0), (1, 1)], 0, [(1, 0), (1, 1)]),
+        ([(0, 1), (1, 0), (1, 1)], 1, [(0, 1), (1, 1)]),
+        ([(0, 1), (1, 1), (0, 0)], 0, [(0, 1), (0, 0)]),
+        ([(1, 1), (1, 0), (0, 1), (0, 0)], 0, [(1, 1), (1, 0)]),
+        ([(1, 1), (1, 0), (0, 1), (0, 0)], 1, [(1, 1), (0, 1)]),
+    ],
+)
+def test_oxygen_filter(data, position, expected):
+    assert oxygen_filter(data, position) == expected
+
+
+def oxygen_filter(data, position):
+    filter_bit = most_common_bit(binary_input=data, position=position)
+    return [value for value in data if value[position] == filter_bit]
+
+
+
+
 def day3a(filepath: str):
     with open(filepath, "r") as file:
         binary_input_data = parse_input(file.read())
