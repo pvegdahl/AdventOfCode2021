@@ -34,6 +34,7 @@ def parse_bingo_numbers(input_string: str) -> List[int]:
         ("3, 1, 4, 1, 5", []),
         ("1\n\n4", [[[4]]]),
         ("1, 2\n\n1 2\n 3 4", [[[1, 2], [3, 4]]]),
+        ("1, 2\n\n1  2\n 3    4", [[[1, 2], [3, 4]]]),
         ("1, 2\n\n1 2 3 2 1\n 3 4 5 6 7\n 1 2 3 4 5\n 9 8 7 6 5\n 63 64 65 66 67", [[[1, 2, 3, 2, 1], [3, 4, 5, 6, 7], [1, 2, 3, 4, 5], [9, 8, 7, 6, 5], [63, 64, 65, 66, 67]]]),
         ("1\n\n4\n", [[[4]]]),
         ("1\n\n4\n\n3\n\n2\n\n1\n", [[[4]], [[3]], [[2]], [[1]]]),
@@ -49,7 +50,7 @@ def parse_bingo_boards_to_matrices(input_string: str) -> List[List[List[int]]]:
     matrix = []
     for line in split_on_lines[2:]:
         if line:
-            matrix.append([int(number) for number in line.strip().split(" ")])
+            matrix.append([int(number) for number in line.strip().split()])
         else:
             result.append(matrix)
             matrix = []
@@ -150,8 +151,14 @@ def test_board_score(bingo_board, updates, multiplier, expected):
 
 def day4a(filepath: str):
     with open(filepath, "r") as file:
-        # parsed_input = parse_input(filepath)
-        pass
+        input_string = file.read()
+    bingo_numbers = parse_bingo_numbers(input_string)
+    bingo_boards = [BingoBoard(matrix) for matrix in parse_bingo_boards_to_matrices(input_string)]
+    for number in bingo_numbers:
+        for board in bingo_boards:
+            board.call_number(number)
+            if board.is_win():
+                return board.score(multiplier=number)
 
 
 def day4b(filepath: str):
