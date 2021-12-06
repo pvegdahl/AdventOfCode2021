@@ -89,6 +89,9 @@ class BingoBoard:
     def is_win(self):
         return any([len(x) == 0 for x in (self.rows + self.columns)])
 
+    def score(self, multiplier: int) -> int:
+        return sum(self.remaining) * multiplier
+
 
 @pytest.mark.parametrize("matrix, rows, columns, remaining", [
     ([[1]], [{1}], [{1}], [1]),
@@ -115,7 +118,7 @@ def test_bingo_call_number(bingo_board, updates, rows, columns, remaining):
     assert bingo_board.remaining == remaining
 
 
-@pytest.mark.parametrize("bingo_board, updates, expected_win", [
+@pytest.mark.parametrize("bingo_board, updates, expected", [
     (BingoBoard([[1]]), [], False),
     (BingoBoard([[1]]), [2, 3, 4], False),
     (BingoBoard([[1]]), [2, 3, 4, 1], True),
@@ -124,10 +127,25 @@ def test_bingo_call_number(bingo_board, updates, rows, columns, remaining):
     (BingoBoard([[1, 2], [3, 4]]), [1, 3], True),
     (BingoBoard([[1, 2], [3, 4]]), [1, 4], False),
 ])
-def test_is_win(bingo_board, updates, expected_win):
+def test_is_win(bingo_board, updates, expected):
     for number in updates:
         bingo_board.call_number(number)
-    assert bingo_board.is_win() == expected_win
+    assert bingo_board.is_win() == expected
+
+
+@pytest.mark.parametrize("bingo_board, updates, multiplier, expected", [
+    (BingoBoard([[1]]), [], 1, 1),
+    (BingoBoard([[1]]), [2, 3, 4], 4, 4),
+    (BingoBoard([[1]]), [2, 3, 4, 1], 23456, 0),
+    (BingoBoard([[1, 2], [3, 4]]), [1], 2, 18),
+    (BingoBoard([[1, 2], [3, 4]]), [1, 2], 3, 21),
+    (BingoBoard([[1, 2], [3, 4]]), [1, 3], 5, 30),
+    (BingoBoard([[1, 2], [3, 4]]), [1, 4], 4, 20),
+])
+def test_board_score(bingo_board, updates, multiplier, expected):
+    for number in updates:
+        bingo_board.call_number(number)
+    assert bingo_board.score(multiplier) == expected
 
 
 def day4a(filepath: str):
