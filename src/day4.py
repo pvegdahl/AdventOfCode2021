@@ -86,6 +86,9 @@ class BingoBoard:
             column.discard(number)
         self.remaining = [x for x in self.remaining if x != number]
 
+    def is_win(self):
+        return any([len(x) == 0 for x in (self.rows + self.columns)])
+
 
 @pytest.mark.parametrize("matrix, rows, columns, remaining", [
     ([[1]], [{1}], [{1}], [1]),
@@ -110,6 +113,21 @@ def test_bingo_call_number(bingo_board, updates, rows, columns, remaining):
     assert bingo_board.rows == rows
     assert bingo_board.columns == columns
     assert bingo_board.remaining == remaining
+
+
+@pytest.mark.parametrize("bingo_board, updates, expected_win", [
+    (BingoBoard([[1]]), [], False),
+    (BingoBoard([[1]]), [2, 3, 4], False),
+    (BingoBoard([[1]]), [2, 3, 4, 1], True),
+    (BingoBoard([[1, 2], [3, 4]]), [1], False),
+    (BingoBoard([[1, 2], [3, 4]]), [1, 2], True),
+    (BingoBoard([[1, 2], [3, 4]]), [1, 3], True),
+    (BingoBoard([[1, 2], [3, 4]]), [1, 4], False),
+])
+def test_is_win(bingo_board, updates, expected_win):
+    for number in updates:
+        bingo_board.call_number(number)
+    assert bingo_board.is_win() == expected_win
 
 
 def day4a(filepath: str):
