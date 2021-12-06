@@ -42,8 +42,14 @@ class LineSegment(NamedTuple):
         ("", []),
         ("0,0 -> 0,1", [LineSegment(start=Point(0, 0), end=Point(0, 1))]),
         ("1,2 -> 3,4", [LineSegment(start=Point(1, 2), end=Point(3, 4))]),
-        ("1,2 -> 3,4\n5,6 -> 7,8\n", [LineSegment(start=Point(1, 2), end=Point(3, 4)), LineSegment(start=Point(5, 6), end=Point(7, 8))]),
-        ],
+        (
+            "1,2 -> 3,4\n5,6 -> 7,8\n",
+            [
+                LineSegment(start=Point(1, 2), end=Point(3, 4)),
+                LineSegment(start=Point(5, 6), end=Point(7, 8)),
+            ],
+        ),
+    ],
 )
 def test_parse_input(input_string, expected):
     assert parse_input(input_string) == expected
@@ -62,8 +68,14 @@ def parse_input(input_string) -> List[LineSegment]:
     [
         (LineSegment(start=Point(0, 0), end=Point(0, 0)), {Point(0, 0)}),
         (LineSegment(start=Point(0, 0), end=Point(0, 1)), {Point(0, 0), Point(0, 1)}),
-        (LineSegment(start=Point(0, 0), end=Point(0, 3)), {Point(0, 0), Point(0, 1), Point(0, 2), Point(0, 3)}),
-        (LineSegment(start=Point(0, 3), end=Point(0, 0)), {Point(0, 0), Point(0, 1), Point(0, 2), Point(0, 3)}),
+        (
+            LineSegment(start=Point(0, 0), end=Point(0, 3)),
+            {Point(0, 0), Point(0, 1), Point(0, 2), Point(0, 3)},
+        ),
+        (
+            LineSegment(start=Point(0, 3), end=Point(0, 0)),
+            {Point(0, 0), Point(0, 1), Point(0, 2), Point(0, 3)},
+        ),
     ],
 )
 def test_get_points_on_line_segment(line_segment, expected):

@@ -35,7 +35,18 @@ def parse_bingo_numbers(input_string: str) -> List[int]:
         ("1\n\n4", [[[4]]]),
         ("1, 2\n\n1 2\n 3 4", [[[1, 2], [3, 4]]]),
         ("1, 2\n\n1  2\n 3    4", [[[1, 2], [3, 4]]]),
-        ("1, 2\n\n1 2 3 2 1\n 3 4 5 6 7\n 1 2 3 4 5\n 9 8 7 6 5\n 63 64 65 66 67", [[[1, 2, 3, 2, 1], [3, 4, 5, 6, 7], [1, 2, 3, 4, 5], [9, 8, 7, 6, 5], [63, 64, 65, 66, 67]]]),
+        (
+            "1, 2\n\n1 2 3 2 1\n 3 4 5 6 7\n 1 2 3 4 5\n 9 8 7 6 5\n 63 64 65 66 67",
+            [
+                [
+                    [1, 2, 3, 2, 1],
+                    [3, 4, 5, 6, 7],
+                    [1, 2, 3, 4, 5],
+                    [9, 8, 7, 6, 5],
+                    [63, 64, 65, 66, 67],
+                ]
+            ],
+        ),
         ("1\n\n4\n", [[[4]]]),
         ("1\n\n4\n\n3\n\n2\n\n1\n", [[[4]], [[3]], [[2]], [[1]]]),
     ],
@@ -94,10 +105,13 @@ class BingoBoard:
         return sum(self.remaining) * multiplier
 
 
-@pytest.mark.parametrize("matrix, rows, columns, remaining", [
-    ([[1]], [{1}], [{1}], [1]),
-    ([[1, 2], [3, 4]], [{1, 2}, {3, 4}], [{1, 3}, {2, 4}], [1, 2, 3, 4]),
-])
+@pytest.mark.parametrize(
+    "matrix, rows, columns, remaining",
+    [
+        ([[1]], [{1}], [{1}], [1]),
+        ([[1, 2], [3, 4]], [{1, 2}, {3, 4}], [{1, 3}, {2, 4}], [1, 2, 3, 4]),
+    ],
+)
 def test_bingo_board_creation(matrix, rows, columns, remaining):
     bingo_board = BingoBoard(matrix)
     assert bingo_board.rows == rows
@@ -105,12 +119,15 @@ def test_bingo_board_creation(matrix, rows, columns, remaining):
     assert bingo_board.remaining == remaining
 
 
-@pytest.mark.parametrize("bingo_board, updates, rows, columns, remaining", [
-    (BingoBoard([[1]]), [1], [set()], [set()], []),
-    (BingoBoard([[1, 2], [3, 4]]), [1], [{2}, {3, 4}], [{3}, {2, 4}], [2, 3, 4]),
-    (BingoBoard([[1, 2], [3, 4]]), [1, 4], [{2}, {3}], [{3}, {2}], [2, 3]),
-    (BingoBoard([[1, 2], [3, 4]]), [1, 2], [set(), {3, 4}], [{3}, {4}], [3, 4]),
-])
+@pytest.mark.parametrize(
+    "bingo_board, updates, rows, columns, remaining",
+    [
+        (BingoBoard([[1]]), [1], [set()], [set()], []),
+        (BingoBoard([[1, 2], [3, 4]]), [1], [{2}, {3, 4}], [{3}, {2, 4}], [2, 3, 4]),
+        (BingoBoard([[1, 2], [3, 4]]), [1, 4], [{2}, {3}], [{3}, {2}], [2, 3]),
+        (BingoBoard([[1, 2], [3, 4]]), [1, 2], [set(), {3, 4}], [{3}, {4}], [3, 4]),
+    ],
+)
 def test_bingo_call_number(bingo_board, updates, rows, columns, remaining):
     for number in updates:
         bingo_board.call_number(number)
@@ -119,30 +136,36 @@ def test_bingo_call_number(bingo_board, updates, rows, columns, remaining):
     assert bingo_board.remaining == remaining
 
 
-@pytest.mark.parametrize("bingo_board, updates, expected", [
-    (BingoBoard([[1]]), [], False),
-    (BingoBoard([[1]]), [2, 3, 4], False),
-    (BingoBoard([[1]]), [2, 3, 4, 1], True),
-    (BingoBoard([[1, 2], [3, 4]]), [1], False),
-    (BingoBoard([[1, 2], [3, 4]]), [1, 2], True),
-    (BingoBoard([[1, 2], [3, 4]]), [1, 3], True),
-    (BingoBoard([[1, 2], [3, 4]]), [1, 4], False),
-])
+@pytest.mark.parametrize(
+    "bingo_board, updates, expected",
+    [
+        (BingoBoard([[1]]), [], False),
+        (BingoBoard([[1]]), [2, 3, 4], False),
+        (BingoBoard([[1]]), [2, 3, 4, 1], True),
+        (BingoBoard([[1, 2], [3, 4]]), [1], False),
+        (BingoBoard([[1, 2], [3, 4]]), [1, 2], True),
+        (BingoBoard([[1, 2], [3, 4]]), [1, 3], True),
+        (BingoBoard([[1, 2], [3, 4]]), [1, 4], False),
+    ],
+)
 def test_is_win(bingo_board, updates, expected):
     for number in updates:
         bingo_board.call_number(number)
     assert bingo_board.is_win() == expected
 
 
-@pytest.mark.parametrize("bingo_board, updates, multiplier, expected", [
-    (BingoBoard([[1]]), [], 1, 1),
-    (BingoBoard([[1]]), [2, 3, 4], 4, 4),
-    (BingoBoard([[1]]), [2, 3, 4, 1], 23456, 0),
-    (BingoBoard([[1, 2], [3, 4]]), [1], 2, 18),
-    (BingoBoard([[1, 2], [3, 4]]), [1, 2], 3, 21),
-    (BingoBoard([[1, 2], [3, 4]]), [1, 3], 5, 30),
-    (BingoBoard([[1, 2], [3, 4]]), [1, 4], 4, 20),
-])
+@pytest.mark.parametrize(
+    "bingo_board, updates, multiplier, expected",
+    [
+        (BingoBoard([[1]]), [], 1, 1),
+        (BingoBoard([[1]]), [2, 3, 4], 4, 4),
+        (BingoBoard([[1]]), [2, 3, 4, 1], 23456, 0),
+        (BingoBoard([[1, 2], [3, 4]]), [1], 2, 18),
+        (BingoBoard([[1, 2], [3, 4]]), [1, 2], 3, 21),
+        (BingoBoard([[1, 2], [3, 4]]), [1, 3], 5, 30),
+        (BingoBoard([[1, 2], [3, 4]]), [1, 4], 4, 20),
+    ],
+)
 def test_board_score(bingo_board, updates, multiplier, expected):
     for number in updates:
         bingo_board.call_number(number)
@@ -153,7 +176,9 @@ def day4a(filepath: str):
     with open(filepath, "r") as file:
         input_string = file.read()
     bingo_numbers = parse_bingo_numbers(input_string)
-    bingo_boards = [BingoBoard(matrix) for matrix in parse_bingo_boards_to_matrices(input_string)]
+    bingo_boards = [
+        BingoBoard(matrix) for matrix in parse_bingo_boards_to_matrices(input_string)
+    ]
     for number in bingo_numbers:
         for board in bingo_boards:
             board.call_number(number)
@@ -165,7 +190,9 @@ def day4b(filepath: str):
     with open(filepath, "r") as file:
         input_string = file.read()
     bingo_numbers = parse_bingo_numbers(input_string)
-    bingo_boards = [BingoBoard(matrix) for matrix in parse_bingo_boards_to_matrices(input_string)]
+    bingo_boards = [
+        BingoBoard(matrix) for matrix in parse_bingo_boards_to_matrices(input_string)
+    ]
     winning_boards = 0
     for number in bingo_numbers:
         for board in bingo_boards:

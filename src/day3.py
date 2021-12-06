@@ -269,8 +269,12 @@ def day3a(filepath: str):
 def day3b(filepath: str):
     with open(filepath, "r") as file:
         binary_input_data = parse_input(file.read())
-    oxygen_value = binary_to_int(filter_to_one(data=binary_input_data, a_filter=oxygen_filter))
-    co2_value = binary_to_int(filter_to_one(data=binary_input_data, a_filter=co2_filter))
+    oxygen_value = binary_to_int(
+        filter_to_one(data=binary_input_data, a_filter=oxygen_filter)
+    )
+    co2_value = binary_to_int(
+        filter_to_one(data=binary_input_data, a_filter=co2_filter)
+    )
     print(f"oxygen = {oxygen_value}")
     print(f"co2 = {co2_value}")
     return oxygen_value * co2_value
