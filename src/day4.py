@@ -163,8 +163,18 @@ def day4a(filepath: str):
 
 def day4b(filepath: str):
     with open(filepath, "r") as file:
-        # parsed_input = parse_input(filepath)
-        pass
+        input_string = file.read()
+    bingo_numbers = parse_bingo_numbers(input_string)
+    bingo_boards = [BingoBoard(matrix) for matrix in parse_bingo_boards_to_matrices(input_string)]
+    winning_boards = 0
+    for number in bingo_numbers:
+        for board in bingo_boards:
+            if not board.is_win():
+                board.call_number(number)
+                if board.is_win():
+                    winning_boards += 1
+                    if winning_boards == len(bingo_boards):
+                        return board.score(multiplier=number)
 
 
 if __name__ == "__main__":
