@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import List, NamedTuple, Set, Dict
+from typing import List, NamedTuple, Set, Dict, Optional
 
 import pytest
 
@@ -17,10 +17,6 @@ class Point(NamedTuple):
 class LineSegment(NamedTuple):
     start: Point
     end: Point
-    x0: int = 0
-    y0: int = 0
-    x1: int = 0
-    y1: int = 0
 
     @classmethod
     def from_string(cls, input_string: str) -> "LineSegment":
@@ -29,7 +25,7 @@ class LineSegment(NamedTuple):
         end = Point.from_string(points[1])
         return cls(start, end)
 
-    def get_points(self) -> Set[Point]:
+    def get_points(self, consider_diagonals: Optional[bool] = False) -> Set[Point]:
         result = set()
         if self.start.x == self.end.x:
             [first, last] = sorted([self.start.y, self.end.y])
@@ -39,6 +35,25 @@ class LineSegment(NamedTuple):
             [first, last] = sorted([self.start.x, self.end.x])
             for x in range(first, last + 1):
                 result.add(Point(x, self.start.y))
+        elif consider_diagonals:
+            if self.start.x < self.end.x:
+                first_x = self.start.x
+                last_x = self.end.x
+                first_y = self.start.y
+                last_y = self.end.y
+            else:
+                first_x = self.end.x
+                last_x = self.start.x
+                first_y = self.end.y
+                last_y = self.start.y
+
+            if first_y < last_y:
+                slope = 1
+            else:
+                slope = -1
+
+            for i in range(0, last_x - first_x + 1):
+                result.add(Point(first_x + i, first_y + slope * i))
         return result
 
 
@@ -98,8 +113,37 @@ def parse_input(input_string) -> List[LineSegment]:
         (LineSegment(start=Point(1, 2), end=Point(3, 4)), set()),
     ],
 )
-def test_get_points_on_line_segment(line_segment, expected):
-    assert line_segment.get_points() == expected
+def test_get_points_on_line_segment_no_diagonals(line_segment, expected):
+    assert line_segment.get_points(consider_diagonals=False) == expected
+
+
+@pytest.mark.parametrize(
+    "line_segment, expected",
+    [
+        (
+            LineSegment(start=Point(5, 6), end=Point(7, 6)),
+            {Point(5, 6), Point(6, 6), Point(7, 6)},
+        ),
+        (
+            LineSegment(start=Point(1, 1), end=Point(3, 3)),
+            {Point(1, 1), Point(2, 2), Point(3, 3)},
+        ),
+        (
+            LineSegment(start=Point(3, 3), end=Point(1, 1)),
+            {Point(1, 1), Point(2, 2), Point(3, 3)},
+        ),
+        (
+            LineSegment(start=Point(1, 3), end=Point(3, 1)),
+            {Point(1, 3), Point(2, 2), Point(3, 1)},
+        ),
+        (
+            LineSegment(start=Point(3, 1), end=Point(1, 3)),
+            {Point(1, 3), Point(2, 2), Point(3, 1)},
+        ),
+    ],
+)
+def test_get_points_on_line_segment_with_diagonals(line_segment, expected):
+    assert line_segment.get_points(consider_diagonals=True) == expected
 
 
 @pytest.mark.parametrize(
@@ -144,10 +188,12 @@ def test_sum_points(line_segments, expected):
     assert sum_points(line_segments) == expected
 
 
-def sum_points(line_segments) -> Dict[Point, int]:
+def sum_points(
+    line_segments, consider_diagonals: Optional[bool] = False
+) -> Dict[Point, int]:
     result = defaultdict(lambda: 0)
     for line_segment in line_segments:
-        for point in line_segment.get_points():
+        for point in line_segment.get_points(consider_diagonals):
             result[point] += 1
     return result
 
@@ -187,27 +233,34 @@ def test_filter_to_two_plus(line_segments, expected):
     assert filter_to_two_plus(line_segments) == expected
 
 
-def filter_to_two_plus(line_segments) -> Set[Point]:
-    point_counts = sum_points(line_segments)
+def filter_to_two_plus(
+    line_segments, consider_diagonals: Optional[bool] = False
+) -> Set[Point]:
+    point_counts = sum_points(
+        line_segments=line_segments, consider_diagonals=consider_diagonals
+    )
     result = {point for point, count in point_counts.items() if count > 1}
     return result
-
-
-# def filter_to_two_plus_2(line_segments) -> Set[Point]:
-#     seen_once = set()
-#     seen_multiple_times = set()
-#     for line_segment in line_segments:line_segments
 
 
 def day5a(filepath: str) -> int:
     with open(filepath, "r") as file:
         input_string = file.read()
-    return len(filter_to_two_plus(parse_input(input_string)))
+    return len(
+        filter_to_two_plus(
+            line_segments=parse_input(input_string), consider_diagonals=False
+        )
+    )
 
 
 def day5b(filepath: str) -> int:
     with open(filepath, "r") as file:
-        pass
+        input_string = file.read()
+    return len(
+        filter_to_two_plus(
+            line_segments=parse_input(input_string), consider_diagonals=True
+        )
+    )
 
 
 if __name__ == "__main__":
