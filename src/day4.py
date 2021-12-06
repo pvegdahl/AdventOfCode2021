@@ -74,9 +74,9 @@ class BingoBoard:
 
     @staticmethod
     def calc_all(matrix):
-        result = set()
+        result = []
         for row in matrix:
-            result.update(row)
+            result.extend(row)
         return result
 
     def call_number(self, number: int):
@@ -84,12 +84,12 @@ class BingoBoard:
             row.discard(number)
         for column in self.columns:
             column.discard(number)
-        self.remaining.discard(number)
+        self.remaining = [x for x in self.remaining if x != number]
 
 
 @pytest.mark.parametrize("matrix, rows, columns, remaining", [
-    ([[1]], [{1}], [{1}], {1}),
-    ([[1, 2], [3, 4]], [{1, 2}, {3, 4}], [{1, 3}, {2, 4}], {1, 2, 3, 4}),
+    ([[1]], [{1}], [{1}], [1]),
+    ([[1, 2], [3, 4]], [{1, 2}, {3, 4}], [{1, 3}, {2, 4}], [1, 2, 3, 4]),
 ])
 def test_bingo_board_creation(matrix, rows, columns, remaining):
     bingo_board = BingoBoard(matrix)
@@ -99,10 +99,10 @@ def test_bingo_board_creation(matrix, rows, columns, remaining):
 
 
 @pytest.mark.parametrize("bingo_board, updates, rows, columns, remaining", [
-    (BingoBoard([[1]]), [1], [set()], [set()], set()),
-    (BingoBoard([[1, 2], [3, 4]]), [1], [{2}, {3, 4}], [{3}, {2, 4}], {2, 3, 4}),
-    (BingoBoard([[1, 2], [3, 4]]), [1, 4], [{2}, {3}], [{3}, {2}], {2, 3}),
-    (BingoBoard([[1, 2], [3, 4]]), [1, 2], [set(), {3, 4}], [{3}, {4}], {3, 4}),
+    (BingoBoard([[1]]), [1], [set()], [set()], []),
+    (BingoBoard([[1, 2], [3, 4]]), [1], [{2}, {3, 4}], [{3}, {2, 4}], [2, 3, 4]),
+    (BingoBoard([[1, 2], [3, 4]]), [1, 4], [{2}, {3}], [{3}, {2}], [2, 3]),
+    (BingoBoard([[1, 2], [3, 4]]), [1, 2], [set(), {3, 4}], [{3}, {4}], [3, 4]),
 ])
 def test_bingo_call_number(bingo_board, updates, rows, columns, remaining):
     for number in updates:
@@ -110,7 +110,6 @@ def test_bingo_call_number(bingo_board, updates, rows, columns, remaining):
     assert bingo_board.rows == rows
     assert bingo_board.columns == columns
     assert bingo_board.remaining == remaining
-
 
 
 def day4a(filepath: str):
