@@ -1,5 +1,5 @@
 from statistics import mean
-from typing import List, Tuple
+from typing import List, Tuple, Callable
 
 import pytest
 
@@ -22,25 +22,45 @@ def parse_input(input_string) -> List[int]:
     return [int(number) for number in input_string.strip().split(",")]
 
 
+def calculate_linear_fuel(current_position: int, target_position: int) -> int:
+    return abs(current_position - target_position)
+
+
 @pytest.mark.parametrize(
-    "positions, expected",
+    "current_position, target_position, expected", [
+        (0, 1, 1),
+        (3, 1, 3),
+        (2, 5, 6),
+    ])
+def test_calculate_triangular_fuel(current_position, target_position, expected):
+    assert calculate_triangular_fuel(current_position, target_position) == expected
+
+
+def calculate_triangular_fuel(current_position, target_position):
+    diff = abs(current_position - target_position)
+    return sum(range(1, diff+1))
+
+
+@pytest.mark.parametrize(
+    "positions, fuel_function, expected",
     [
-        ([1], (1, 0)),
-        ([1, 2, 3], (2, 2)),
-        ([16, 1, 2, 0, 4, 2, 7, 1, 2, 14], (2, 37)),
+        ([1], calculate_linear_fuel, (1, 0)),
+        ([1, 2, 3], calculate_linear_fuel, (2, 2)),
+        ([16, 1, 2, 0, 4, 2, 7, 1, 2, 14], calculate_linear_fuel, (2, 37)),
+        ([16, 1, 2, 0, 4, 2, 7, 1, 2, 14], calculate_triangular_fuel, (5, 168)),
     ],
 )
-def test_best_position_and_fuel(positions, expected):
-    assert best_position_and_fuel(positions) == expected
+def test_best_position_and_fuel(positions, fuel_function, expected):
+    assert best_position_and_fuel(positions, fuel_function) == expected
 
 
-def best_position_and_fuel(positions) -> Tuple[int, int]:
+def best_position_and_fuel(positions: List[int], fuel_function: Callable = calculate_linear_fuel) -> Tuple[int, int]:
     min_pos = min(positions)
     max_pos = max(positions)
     best_position = None
     best_fuel = 1e100
     for pos in range(min_pos, max_pos + 1):
-        fuel = calculate_fuel(current_positions=positions, target_position=pos)
+        fuel = calculate_total_fuel(current_positions=positions, target_position=pos, fuel_function=fuel_function)
         if fuel < best_fuel:
             best_position = pos
             best_fuel = fuel
@@ -55,12 +75,16 @@ def best_position_and_fuel(positions) -> Tuple[int, int]:
         ([16, 1, 2, 0, 4, 2, 7, 1, 2, 14], 2, 37),
     ],
 )
-def test_calculate_fuel(current_positions, target_position, expected):
-    assert calculate_fuel(current_positions, target_position) == expected
+def test_calculate_total_fuel(current_positions, target_position, expected):
+    assert calculate_total_fuel(current_positions=current_positions, target_position=target_position) == expected
 
 
-def calculate_fuel(current_positions: List[int], target_position: int) -> int:
-    return sum([abs(pos - target_position) for pos in current_positions])
+def calculate_total_fuel(
+    current_positions: List[int],
+    target_position: int,
+    fuel_function: Callable = calculate_linear_fuel,
+) -> int:
+    return sum([fuel_function(pos, target_position) for pos in current_positions])
 
 
 def day7a(filepath: str) -> int:
@@ -73,7 +97,10 @@ def day7a(filepath: str) -> int:
 
 def day7b(filepath: str) -> int:
     with open(filepath, "r") as file:
-        pass
+        current_positions = parse_input(file.read())
+    pos, fuel = best_position_and_fuel(current_positions, fuel_function=calculate_triangular_fuel)
+    print(f"Best position and fuel: {pos} and {fuel}")
+    return fuel
 
 
 if __name__ == "__main__":
