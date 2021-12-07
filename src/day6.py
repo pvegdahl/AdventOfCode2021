@@ -28,14 +28,17 @@ def parse_input(input_string) -> Dict[int, int]:
     return result
 
 
-@pytest.mark.parametrize("initial_state, expected", [
-    ({}, {}),
-    ({1: 1}, {0: 1}),
-    ({1: 1, 2: 2, 3: 3}, {0: 1, 1: 2, 2: 3}),
-    ({0: 1}, {6: 1, 8: 1}),
-    ({1: 1, 2: 2, 3: 3, 0: 43}, {0: 1, 1: 2, 2: 3, 6: 43, 8: 43}),
-    ({0: 2, 7: 2}, {6: 4, 8: 2}),
-])
+@pytest.mark.parametrize(
+    "initial_state, expected",
+    [
+        ({}, {}),
+        ({1: 1}, {0: 1}),
+        ({1: 1, 2: 2, 3: 3}, {0: 1, 1: 2, 2: 3}),
+        ({0: 1}, {6: 1, 8: 1}),
+        ({1: 1, 2: 2, 3: 3, 0: 43}, {0: 1, 1: 2, 2: 3, 6: 43, 8: 43}),
+        ({0: 2, 7: 2}, {6: 4, 8: 2}),
+    ],
+)
 def test_one_day_change(initial_state, expected):
     assert one_day_change(initial_state) == expected
 
@@ -47,20 +50,23 @@ def one_day_change(initial_state: Dict[int, int]) -> Dict[int, int]:
             result[6] += initial_state[0]
             result[8] += initial_state[0]
         else:
-            result[key-1] += value
+            result[key - 1] += value
     return result
 
 
-@pytest.mark.parametrize("initial_state, days, expected", [
-    ({}, 1, {}),
-    ({1: 1}, 1, {0: 1}),
-    ({1: 1, 2: 2, 3: 3}, 1, {0: 1, 1: 2, 2: 3}),
-    ({0: 1}, 1, {6: 1, 8: 1}),
-    ({1: 1, 2: 2, 3: 3, 0: 43}, 1, {0: 1, 1: 2, 2: 3, 6: 43, 8: 43}),
-    ({1: 1}, 2, {6: 1, 8: 1}),
-    ({1: 1}, 4, {4: 1, 6: 1}),
-    ({0: 1, 2: 2}, 4, {3: 1, 5: 3, 7: 2}),
-])
+@pytest.mark.parametrize(
+    "initial_state, days, expected",
+    [
+        ({}, 1, {}),
+        ({1: 1}, 1, {0: 1}),
+        ({1: 1, 2: 2, 3: 3}, 1, {0: 1, 1: 2, 2: 3}),
+        ({0: 1}, 1, {6: 1, 8: 1}),
+        ({1: 1, 2: 2, 3: 3, 0: 43}, 1, {0: 1, 1: 2, 2: 3, 6: 43, 8: 43}),
+        ({1: 1}, 2, {6: 1, 8: 1}),
+        ({1: 1}, 4, {4: 1, 6: 1}),
+        ({0: 1, 2: 2}, 4, {3: 1, 5: 3, 7: 2}),
+    ],
+)
 def test_n_day_change(initial_state, days, expected):
     assert n_day_change(initial_state=initial_state, days=days) == expected
 
