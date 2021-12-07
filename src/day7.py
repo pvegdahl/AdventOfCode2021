@@ -65,7 +65,10 @@ def calculate_fuel(current_positions: List[int], target_position: int) -> int:
 
 def day7a(filepath: str) -> int:
     with open(filepath, "r") as file:
-        pass
+        current_positions = parse_input(file.read())
+    pos, fuel = best_position_and_fuel(current_positions)
+    print(f"Best position and fuel: {pos} and {fuel}")
+    return fuel
 
 
 def day7b(filepath: str) -> int:
