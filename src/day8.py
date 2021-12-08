@@ -105,8 +105,27 @@ def test_decode_patterns(input_patterns, expected):
     assert decode_patterns(input_patterns) == expected
 
 
-def decode_patterns(input_patterns: List[str]) -> Dict:
-    sorted_patterns = ["".join(sorted(pattern)) for pattern in input_patterns]
+DEFAULT_MAPPINGS = {
+    "ABCEFG": 0,
+    "CF": 1,
+    "ACDEG": 2,
+    "ACDFG": 3,
+    "BCDF": 4,
+    "ABDFG": 5,
+    "ABDEFG": 6,
+    "ACF": 7,
+    "ABCDEFG": 8,
+    "ABCDFG": 9,
+}
+
+
+def decode_patterns(patterns: List[str]) -> Dict:
+    letter_mappings = decode_letter_mapping(patterns)
+    result = {}
+    for key, value in DEFAULT_MAPPINGS.items():
+        new_key = "".join(sorted(letter_mappings[letter] for letter in key))
+        result[new_key] = value
+    return result
 
 
 @pytest.mark.parametrize(
@@ -167,7 +186,6 @@ def decode_letter_mapping(patterns: []) -> Dict[str, str]:
     return result
 
 
-
 def day8a(filepath: str) -> int:
     output_patterns = []
     with open(filepath, "r") as file:
@@ -178,8 +196,15 @@ def day8a(filepath: str) -> int:
 
 
 def day8b(filepath: str) -> int:
+    numbers = []
     with open(filepath, "r") as file:
-        pass
+        for line in file.readlines():
+            decoder = decode_patterns(parse_one_line_of_input_signal_patterns(line))
+            digits = ""
+            for pattern in parse_one_line_of_output_signal_patterns(line):
+                digits += str(decoder[pattern])
+            numbers.append(int(digits))
+    return sum(numbers)
 
 
 if __name__ == "__main__":
