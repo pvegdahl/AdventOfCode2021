@@ -19,6 +19,20 @@ def parse_one_line_of_input_signal_patterns(input_line) -> List[str]:
     return input_line.split("|")[0].strip().split(" ")
 
 
+@pytest.mark.parametrize(
+    "input_line, expected",
+    [
+        ("abc def ghi | some other strings", ["some", "other", "strings"])
+    ],
+)
+def test_parse_one_line_of_output_signal_patterns(input_line, expected):
+    assert parse_one_line_of_output_signal_patterns(input_line) == expected
+
+
+def parse_one_line_of_output_signal_patterns(input_line) -> List[str]:
+    return input_line.split("|")[1].strip().split(" ")
+
+
 def day8a(filepath: str) -> int:
     with open(filepath, "r") as file:
         pass
