@@ -75,15 +75,15 @@ def count_by_lengths(patterns: List[str]) -> Dict[int, int]:
     [
         (
             [
-                "acedgfb",
-                "cdfbe",
-                "gcdfa",
-                "fbcad",
-                "dab",
-                "cefabd",
-                "cdfgeb",
-                "eafb",
-                "cagedb",
+                "abcdefg",
+                "bcdef",
+                "acdfg",
+                "abcdf",
+                "abd",
+                "abcdef",
+                "bcdefg",
+                "abef",
+                "abcdeg",
                 "ab",
             ],
             {
@@ -105,40 +105,67 @@ def test_decode_patterns(input_patterns, expected):
     assert decode_patterns(input_patterns) == expected
 
 
-@pytest.mark.parametrize(
-    "input_patterns, expected",
-    [
-        (
-            [
-                "acedgfb",
-                "cdfbe",
-                "gcdfa",
-                "fbcad",
-                "dab",
-                "cefabd",
-                "cdfgeb",
-                "eafb",
-                "cagedb",
-                "ab",
-            ],
-            {
-                "A": "a",
-                "B": "a",
-                "C": "a",
-                "D": "a",
-                "E": "a",
-                "F": "a",
-                "G": "a",
-            },
-        )
-    ],
-)
 def decode_patterns(input_patterns: List[str]) -> Dict:
     sorted_patterns = ["".join(sorted(pattern)) for pattern in input_patterns]
 
 
-def test_decode_letter_mapping():
-    pass
+@pytest.mark.parametrize(
+    "input_patterns, expected",
+    [
+        (
+                [
+                    "abcdefg",
+                    "bcdef",
+                    "acdfg",
+                    "abcdf",
+                    "abd",
+                    "abcdef",
+                    "bcdefg",
+                    "abef",
+                    "abcdeg",
+                    "ab",
+                ],
+                {
+                    "A": "d",
+                    "B": "e",
+                    "C": "a",
+                    "D": "f",
+                    "E": "g",
+                    "F": "b",
+                    "G": "c",
+                },
+        )
+    ],
+)
+def test_decode_letter_mapping(input_patterns, expected):
+    assert decode_letter_mapping(input_patterns) == expected
+
+
+def decode_letter_mapping(patterns: []) -> Dict[str, str]:
+    all_letters = []
+    for pattern in patterns:
+        all_letters.extend(pattern)
+    letter_histogram = defaultdict(lambda: 0)
+    for letter in all_letters:
+        letter_histogram[letter] += 1
+    reversed_letter_histogram = defaultdict(lambda: set())
+    for letter, count in letter_histogram.items():
+        reversed_letter_histogram[count].add(letter)
+
+    pattern_for_one = set([x for x in patterns if len(x) == 2][0])
+    pattern_for_four = set([x for x in patterns if len(x) == 4][0])
+
+    result = {
+        "A": next(iter(reversed_letter_histogram[8].difference(pattern_for_one))),
+        "B": next(iter(reversed_letter_histogram[6])),
+        "C": next(iter(reversed_letter_histogram[8].intersection(pattern_for_one))),
+        "D": next(iter(reversed_letter_histogram[7].intersection(pattern_for_four))),
+        "E": next(iter(reversed_letter_histogram[4])),
+        "F": next(iter(reversed_letter_histogram[9])),
+        "G": next(iter(reversed_letter_histogram[7].difference(pattern_for_four))),
+    }
+    return result
+
 
 
 def day8a(filepath: str) -> int:
