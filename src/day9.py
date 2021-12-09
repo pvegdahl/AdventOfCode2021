@@ -93,10 +93,15 @@ def test_get_matrix_neighbors(matrix, i, j, expected):
 
 
 def get_matrix_neighbors(matrix: List[List[int]], i: int, j: int) -> List[int]:
-    return [(matrix[point[0]][point[1]]) for point in get_matrix_neighbor_indices(matrix, i, j)]
+    return [
+        (matrix[point[0]][point[1]])
+        for point in get_matrix_neighbor_indices(matrix, i, j)
+    ]
 
 
-def get_matrix_neighbor_indices(matrix: List[List[int]], i: int, j: int) -> List[Tuple[int, int]]:
+def get_matrix_neighbor_indices(
+    matrix: List[List[int]], i: int, j: int
+) -> List[Tuple[int, int]]:
     result = []
     points = [(i - 1, j), (i + 1, j), (i, j - 1), (i, j + 1)]
     for point in points:
@@ -107,6 +112,61 @@ def get_matrix_neighbor_indices(matrix: List[List[int]], i: int, j: int) -> List
 
 def in_matrix(matrix: List[List[int]], i: int, j: int) -> bool:
     return (i >= 0) and (j >= 0) and (i < len(matrix)) and (j < len(matrix[i]))
+
+
+TEST_MATRIX = [
+    [2, 1, 9, 9, 9, 4, 3, 2, 1, 0],
+    [3, 9, 8, 7, 8, 9, 4, 9, 2, 1],
+    [9, 8, 5, 6, 7, 8, 9, 8, 9, 2],
+    [8, 7, 6, 7, 8, 9, 6, 7, 8, 9],
+    [9, 8, 9, 9, 9, 6, 5, 6, 7, 8],
+]
+
+
+@pytest.mark.parametrize(
+    "matrix, origin, expected",
+    [
+        ([[0, 9]], (0, 0), 1),
+        ([[0, 1], [3, 9]], (0, 0), 3),
+        (TEST_MATRIX, (0, 1), 3),
+        (TEST_MATRIX, (0, 9), 9),
+        (TEST_MATRIX, (2, 2), 14),
+        (TEST_MATRIX, (4, 6), 9),
+    ],
+)
+def test_calculate_size_of_basin(matrix, origin, expected):
+    assert calculate_size_of_basin(matrix, origin) == expected
+
+
+def calculate_size_of_basin(matrix: List[List[int]], origin: Tuple[int, int]) -> int:
+    basin = set()
+    neighbors = [origin]
+    while neighbors:
+        basin.update(neighbors)
+        new_neighbors = []
+        for neighbor in neighbors:
+            candidate_neighbors = set(
+                get_matrix_neighbor_indices(matrix=matrix, i=neighbor[0], j=neighbor[1])
+            )
+            candidate_neighbors -= basin
+            new_neighbors.extend(
+                [
+                    neighbor
+                    for neighbor in candidate_neighbors
+                    if matrix[neighbor[0]][neighbor[1]] < 9
+                ]
+            )
+            basin.update(new_neighbors)
+        neighbors = new_neighbors
+    return len(basin)
+
+
+def test_get_all_basin_sizes():
+    assert get_all_basin_sizes(TEST_MATRIX) == [3, 9, 9, 14]
+
+
+def get_all_basin_sizes(matrix: List[List[int]]) -> List[int]:
+    return sorted([calculate_size_of_basin(matrix=matrix, origin=point) for point in find_low_point_indices(matrix)])
 
 
 def day9a(filepath: str) -> int:
