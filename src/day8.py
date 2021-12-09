@@ -132,27 +132,27 @@ def decode_patterns(patterns: List[str]) -> Dict:
     "input_patterns, expected",
     [
         (
-                [
-                    "abcdefg",
-                    "bcdef",
-                    "acdfg",
-                    "abcdf",
-                    "abd",
-                    "abcdef",
-                    "bcdefg",
-                    "abef",
-                    "abcdeg",
-                    "ab",
-                ],
-                {
-                    "A": "d",
-                    "B": "e",
-                    "C": "a",
-                    "D": "f",
-                    "E": "g",
-                    "F": "b",
-                    "G": "c",
-                },
+            [
+                "abcdefg",
+                "bcdef",
+                "acdfg",
+                "abcdf",
+                "abd",
+                "abcdef",
+                "bcdefg",
+                "abef",
+                "abcdeg",
+                "ab",
+            ],
+            {
+                "A": "d",
+                "B": "e",
+                "C": "a",
+                "D": "f",
+                "E": "g",
+                "F": "b",
+                "G": "c",
+            },
         )
     ],
 )
