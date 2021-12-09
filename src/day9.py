@@ -166,19 +166,27 @@ def test_get_all_basin_sizes():
 
 
 def get_all_basin_sizes(matrix: List[List[int]]) -> List[int]:
-    return sorted([calculate_size_of_basin(matrix=matrix, origin=point) for point in find_low_point_indices(matrix)])
+    return sorted(
+        [
+            calculate_size_of_basin(matrix=matrix, origin=point)
+            for point in find_low_point_indices(matrix)
+        ]
+    )
 
 
 def day9a(filepath: str) -> int:
     with open(filepath, "r") as file:
-        data = parse_input(file.read())
-    low_points = find_low_points(data)
+        matrix = parse_input(file.read())
+    low_points = find_low_points(matrix)
     return len(low_points) + sum(low_points)
 
 
 def day9b(filepath: str) -> int:
     with open(filepath, "r") as file:
-        pass
+        matrix = parse_input(file.read())
+    basin_sizes = get_all_basin_sizes(matrix)
+    print(f"Basin sizes = {basin_sizes}")
+    return basin_sizes[-1] * basin_sizes[-2] * basin_sizes[-3]
 
 
 if __name__ == "__main__":
