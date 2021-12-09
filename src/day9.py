@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 
 import pytest
 
@@ -43,12 +43,31 @@ def test_find_low_points(matrix, expected):
 
 
 def find_low_points(matrix):
+    return [matrix[point[0]][point[1]] for point in find_low_point_indices(matrix)]
+
+
+@pytest.mark.parametrize(
+    "matrix, expected",
+    [
+        ([[1]], [(0, 0)]),
+        ([[1, 2]], [(0, 0)]),
+        ([[2, 1]], [(0, 1)]),
+        ([[1, 2, 1]], [(0, 0), (0, 2)]),
+        ([[1, 3, 2]], [(0, 0), (0, 2)]),
+        ([[1, 2], [2, 1]], [(0, 0), (1, 1)]),
+    ],
+)
+def test_find_low_point_indices(matrix, expected):
+    assert find_low_point_indices(matrix) == expected
+
+
+def find_low_point_indices(matrix: List[List[int]]) -> List[Tuple[int, int]]:
     result = []
     for i in range(len(matrix)):
         line = matrix[i]
         for j in range(len(line)):
             if less_than_neighbors(matrix, i, j):
-                result.append(line[j])
+                result.append((i, j))
     return result
 
 
@@ -74,11 +93,15 @@ def test_get_matrix_neighbors(matrix, i, j, expected):
 
 
 def get_matrix_neighbors(matrix: List[List[int]], i: int, j: int) -> List[int]:
+    return [(matrix[point[0]][point[1]]) for point in get_matrix_neighbor_indices(matrix, i, j)]
+
+
+def get_matrix_neighbor_indices(matrix: List[List[int]], i: int, j: int) -> List[Tuple[int, int]]:
     result = []
     points = [(i - 1, j), (i + 1, j), (i, j - 1), (i, j + 1)]
     for point in points:
         if in_matrix(matrix=matrix, i=point[0], j=point[1]):
-            result.append(matrix[point[0]][point[1]])
+            result.append((point[0], point[1]))
     return result
 
 
