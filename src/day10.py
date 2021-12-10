@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List, Any
 
 import pytest
 
@@ -26,6 +26,8 @@ END_TO_START = {
     ">": "<",
     ")": "(",
 }
+
+START_TO_END = {value: key for key, value in END_TO_START.items()}
 
 
 def find_first_corrupted_char(input_string: str) -> Optional[str]:
@@ -82,6 +84,124 @@ def score_lines(input_string: str) -> int:
     result = 0
     for line in input_string.strip().split("\n"):
         result += CHAR_TO_SCORE.get(find_first_corrupted_char(line)) or 0
+    return result
+
+
+class Stack:
+    def __init__(self, initial_stack: Optional[List] = None):
+        if initial_stack:
+            self.stack = initial_stack
+        else:
+            self.stack = []
+
+    def size(self):
+        return len(self.stack)
+
+    def push(self, value):
+        self.stack.append(value)
+
+    def pop(self) -> Any:
+        return self.stack.pop()
+
+    def handle_value(self, value):
+        if value in START_TO_END:
+            self.push(value)
+        elif value in END_TO_START:
+            if not self.stack or self.stack[-1] != END_TO_START[value]:
+                raise Exception(value)
+            self.pop()
+
+
+@pytest.mark.parametrize("stack, expected", [
+    (Stack(), 0),
+    (Stack([]), 0),
+    (Stack([1, 2, 3]), 3),
+    (Stack(["a", "b", "c", "d"]), 4),
+])
+def test_stack_size(stack, expected):
+    assert stack.size() == expected
+
+
+@pytest.mark.parametrize("items, expected", [
+    ([], 0),
+    ([1], 1),
+    ([1, 2, 3], 3),
+])
+def test_stack_push_pop(items, expected):
+    stack = Stack()
+    size = 0
+    for item in items:
+        stack.push(item)
+        size += 1
+        assert stack.size() == size
+    assert stack.size() == expected
+    for item in reversed(items):
+        assert stack.pop() == item
+        size -= 1
+        assert stack.size() == size
+
+
+@pytest.mark.parametrize("stack, new_value, expected", [
+    (Stack(), "{", Stack(["{"])),
+    (Stack(["("]), "{", Stack(["(", "{"])),
+    (Stack(["("]), ")", Stack()),
+    (Stack(["(", "{"]), "}", Stack(["("])),
+])
+def test_stack_handle_value(stack, new_value, expected):
+    stack.handle_value(new_value)
+    assert stack.stack == expected.stack
+
+
+@pytest.mark.parametrize("stack, new_value", [
+    (Stack(), "}"),
+    (Stack(["("]), "}"),
+    (Stack(["{", "("]), "}"),
+])
+def test_stack_handle_value_throws_exception(stack, new_value):
+    with pytest.raises(Exception):
+        stack.handle_value(new_value)
+
+
+@pytest.mark.parametrize("input_string, expected", [
+    ("", ""),
+    ("(", ")"),
+    ("<", ">"),
+    ("<><", ">"),
+    # ("<<", ">>"),
+    # ("<<>", ">"),
+    # ("[({(<(())[]>[[{[]{<()<>>", "}}]])})]"),
+# [(()[<>])]({[<{<<[]>>( - Complete by adding )}>]}).
+# (((({<>}<{<{<>}{[]{[]{} - Complete by adding }}>}>)))).
+# {<[[]]>}<{[{[{[]{()[[[] - Complete by adding ]]}}]}]}>.
+# <{([{{}}[<[[[<>{}]]]>[]] - Complete by adding ])}>.
+#     ("", ""),
+#     ("", ""),
+#     ("", ""),
+#     ("", ""),
+#     ("", ""),
+])
+def test_get_completion_string(input_string, expected):
+    assert get_completion_string(input_string) == expected
+
+
+def get_completion_string(input_string):
+    result = ""
+    stack = []
+    for char in input_string:
+        if char in START_TO_END:
+            stack.append(char)
+        elif True:
+            pass
+        elif END_TO_START[char] == stack[-1]:
+            stack.pop()
+        else:
+            # Malformed
+            return None
+    for i in range(len(input_string)-1, -1, -1):
+        if input_string[i] in START_TO_END:
+            result += START_TO_END.get(input_string[i])
+        else:
+            return result
     return result
 
 
