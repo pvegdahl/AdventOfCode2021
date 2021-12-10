@@ -207,15 +207,23 @@ SCORE_MAP_2 = {
     ("]", 2),
     ("}", 3),
     (">", 4),
+    (")]", 7),
+    ("}}]])})]", 288957),
+    (")}>]})", 5566),
+    ("}}>}>))))", 1480781),
+    ("]]}}]}]}>", 995444),
+    ("])}>", 294),
 ])
 def test_calculate_completion_score(completion_string, expected):
     assert calculate_completion_score(completion_string) == expected
 
 
 def calculate_completion_score(completion_string):
-    if not completion_string:
-        return 0
-    return SCORE_MAP_2[completion_string]
+    result = 0
+    for char in completion_string:
+        result *= 5
+        result += SCORE_MAP_2[char]
+    return result
 
 
 def day10a(filepath: str) -> int:
