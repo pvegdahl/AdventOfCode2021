@@ -167,42 +167,55 @@ def test_stack_handle_value_throws_exception(stack, new_value):
     ("(", ")"),
     ("<", ">"),
     ("<><", ">"),
-    # ("<<", ">>"),
-    # ("<<>", ">"),
-    # ("[({(<(())[]>[[{[]{<()<>>", "}}]])})]"),
-# [(()[<>])]({[<{<<[]>>( - Complete by adding )}>]}).
-# (((({<>}<{<{<>}{[]{[]{} - Complete by adding }}>}>)))).
-# {<[[]]>}<{[{[{[]{()[[[] - Complete by adding ]]}}]}]}>.
-# <{([{{}}[<[[[<>{}]]]>[]] - Complete by adding ])}>.
-#     ("", ""),
-#     ("", ""),
-#     ("", ""),
-#     ("", ""),
-#     ("", ""),
+    ("<<", ">>"),
+    ("<<>", ">"),
+    ("[({(<(())[]>[[{[]{<()<>>", "}}]])})]"),
+    ("[(()[<>])]({[<{<<[]>>(", ")}>]})"),
+    ("(((({<>}<{<{<>}{[]{[]{}", "}}>}>))))"),
+    ("{<[[]]>}<{[{[{[]{()[[[]", "]]}}]}]}>"),
+    ("<{([{{}}[<[[[<>{}]]]>[]]", "])}>"),
 ])
 def test_get_completion_string(input_string, expected):
     assert get_completion_string(input_string) == expected
 
 
 def get_completion_string(input_string):
-    result = ""
-    stack = []
-    for char in input_string:
-        if char in START_TO_END:
-            stack.append(char)
-        elif True:
-            pass
-        elif END_TO_START[char] == stack[-1]:
-            stack.pop()
-        else:
-            # Malformed
-            return None
-    for i in range(len(input_string)-1, -1, -1):
-        if input_string[i] in START_TO_END:
-            result += START_TO_END.get(input_string[i])
-        else:
-            return result
-    return result
+    stack = Stack()
+    # noinspection PyBroadException
+    try:
+        for char in input_string:
+            stack.handle_value(char)
+    except Exception:
+        return None
+    result = []
+    while stack.size():
+        result.append(START_TO_END[stack.pop()])
+    return "".join(result)
+
+
+SCORE_MAP_2 = {
+    ")": 1,
+    "]": 2,
+    "}": 3,
+    ">": 4,
+}
+
+
+@pytest.mark.parametrize("completion_string, expected", [
+    ("", 0),
+    (")", 1),
+    ("]", 2),
+    ("}", 3),
+    (">", 4),
+])
+def test_calculate_completion_score(completion_string, expected):
+    assert calculate_completion_score(completion_string) == expected
+
+
+def calculate_completion_score(completion_string):
+    if not completion_string:
+        return 0
+    return SCORE_MAP_2[completion_string]
 
 
 def day10a(filepath: str) -> int:
