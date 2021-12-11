@@ -226,6 +226,51 @@ def calculate_completion_score(completion_string):
     return result
 
 
+@pytest.mark.parametrize("input_string, expected", [
+    ("", 0),
+    ("(", 1),
+    ("}", 0),
+    ("""
+[({(<(())[]>[[{[]{<()<>>
+[(()[<>])]({[<{<<[]>>(
+{([(<{}[<>[]}>{[]{[(<()>
+(((({<>}<{<{<>}{[]{[]{}
+[[<[([]))<([[{}[[()]]]
+[{[{({}]{}}([{[{{{}}([]
+{<[[]]>}<{[{[{[]{()[[[]
+[<(<(<(<{}))><([]([]()
+<{([([[(<>()){}]>(<<{{
+<{([{{}}[<[[[<>{}]]]>[]]
+    """, 288957),
+("""
+[{[{({}]{}}([{[{{{}}([]
+{<[[]]>}<{[{[{[]{()[[[]
+[<(<(<(<{}))><([]([]()
+<{([([[(<>()){}]>(<<{{
+<{([{{}}[<[[[<>{}]]]>[]]
+[({(<(())[]>[[{[]{<()<>>
+[(()[<>])]({[<{<<[]>>(
+{([(<{}[<>[]}>{[]{[(<()>
+(((({<>}<{<{<>}{[]{[]{}
+[[<[([]))<([[{}[[()]]]
+    """, 288957),
+])
+def test_score_lines_2(input_string, expected):
+    assert score_lines_2(input_string) == expected
+
+
+def score_lines_2(input_string: str) -> int:
+    scores = []
+    for line in input_string.strip().split("\n"):
+        completion_string = get_completion_string(line)
+        if completion_string:
+            scores.append(calculate_completion_score(completion_string))
+    if not scores:
+        return 0
+    middle_index = int((len(scores) - 1) / 2)
+    return sorted(scores)[middle_index]
+
+
 def day10a(filepath: str) -> int:
     with open(filepath, "r") as file:
         return score_lines(file.read())
@@ -233,7 +278,7 @@ def day10a(filepath: str) -> int:
 
 def day10b(filepath: str) -> int:
     with open(filepath, "r") as file:
-        pass
+        return score_lines_2(file.read())
 
 
 if __name__ == "__main__":
