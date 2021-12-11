@@ -28,7 +28,7 @@ def test_add_one_to_everything(test_matrix):
 def add_one_to_everything(matrix: List[List[int]]) -> List[List[int]]:
     result = []
     for row in matrix:
-        result.append([x+1 for x in row])
+        result.append([x + 1 for x in row])
     return result
 
 

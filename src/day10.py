@@ -65,7 +65,8 @@ CHAR_TO_SCORE = {
         ("]\n)", 60),
         ("())\n]", 60),
         ("())\n]\n()\n", 60),
-        ("""[({(<(())[]>[[{[]{<()<>>
+        (
+            """[({(<(())[]>[[{[]{<()<>>
 [(()[<>])]({[<{<<[]>>(
 {([(<{}[<>[]}>{[]{[(<()>
 (((({<>}<{<{<>}{[]{[]{}
@@ -74,8 +75,11 @@ CHAR_TO_SCORE = {
 {<[[]]>}<{[{[{[]{()[[[]
 [<(<(<(<{}))><([]([]()
 <{([([[(<>()){}]>(<<{{
-<{([{{}}[<[[[<>{}]]]>[]]""", 26397)
-    ])
+<{([{{}}[<[[[<>{}]]]>[]]""",
+            26397,
+        ),
+    ],
+)
 def test_score_lines(input_string, expected):
     assert score_lines(input_string) == expected
 
@@ -112,21 +116,27 @@ class Stack:
             self.pop()
 
 
-@pytest.mark.parametrize("stack, expected", [
-    (Stack(), 0),
-    (Stack([]), 0),
-    (Stack([1, 2, 3]), 3),
-    (Stack(["a", "b", "c", "d"]), 4),
-])
+@pytest.mark.parametrize(
+    "stack, expected",
+    [
+        (Stack(), 0),
+        (Stack([]), 0),
+        (Stack([1, 2, 3]), 3),
+        (Stack(["a", "b", "c", "d"]), 4),
+    ],
+)
 def test_stack_size(stack, expected):
     assert stack.size() == expected
 
 
-@pytest.mark.parametrize("items, expected", [
-    ([], 0),
-    ([1], 1),
-    ([1, 2, 3], 3),
-])
+@pytest.mark.parametrize(
+    "items, expected",
+    [
+        ([], 0),
+        ([1], 1),
+        ([1, 2, 3], 3),
+    ],
+)
 def test_stack_push_pop(items, expected):
     stack = Stack()
     size = 0
@@ -141,40 +151,49 @@ def test_stack_push_pop(items, expected):
         assert stack.size() == size
 
 
-@pytest.mark.parametrize("stack, new_value, expected", [
-    (Stack(), "{", Stack(["{"])),
-    (Stack(["("]), "{", Stack(["(", "{"])),
-    (Stack(["("]), ")", Stack()),
-    (Stack(["(", "{"]), "}", Stack(["("])),
-])
+@pytest.mark.parametrize(
+    "stack, new_value, expected",
+    [
+        (Stack(), "{", Stack(["{"])),
+        (Stack(["("]), "{", Stack(["(", "{"])),
+        (Stack(["("]), ")", Stack()),
+        (Stack(["(", "{"]), "}", Stack(["("])),
+    ],
+)
 def test_stack_handle_value(stack, new_value, expected):
     stack.handle_value(new_value)
     assert stack.stack == expected.stack
 
 
-@pytest.mark.parametrize("stack, new_value", [
-    (Stack(), "}"),
-    (Stack(["("]), "}"),
-    (Stack(["{", "("]), "}"),
-])
+@pytest.mark.parametrize(
+    "stack, new_value",
+    [
+        (Stack(), "}"),
+        (Stack(["("]), "}"),
+        (Stack(["{", "("]), "}"),
+    ],
+)
 def test_stack_handle_value_throws_exception(stack, new_value):
     with pytest.raises(Exception):
         stack.handle_value(new_value)
 
 
-@pytest.mark.parametrize("input_string, expected", [
-    ("", ""),
-    ("(", ")"),
-    ("<", ">"),
-    ("<><", ">"),
-    ("<<", ">>"),
-    ("<<>", ">"),
-    ("[({(<(())[]>[[{[]{<()<>>", "}}]])})]"),
-    ("[(()[<>])]({[<{<<[]>>(", ")}>]})"),
-    ("(((({<>}<{<{<>}{[]{[]{}", "}}>}>))))"),
-    ("{<[[]]>}<{[{[{[]{()[[[]", "]]}}]}]}>"),
-    ("<{([{{}}[<[[[<>{}]]]>[]]", "])}>"),
-])
+@pytest.mark.parametrize(
+    "input_string, expected",
+    [
+        ("", ""),
+        ("(", ")"),
+        ("<", ">"),
+        ("<><", ">"),
+        ("<<", ">>"),
+        ("<<>", ">"),
+        ("[({(<(())[]>[[{[]{<()<>>", "}}]])})]"),
+        ("[(()[<>])]({[<{<<[]>>(", ")}>]})"),
+        ("(((({<>}<{<{<>}{[]{[]{}", "}}>}>))))"),
+        ("{<[[]]>}<{[{[{[]{()[[[]", "]]}}]}]}>"),
+        ("<{([{{}}[<[[[<>{}]]]>[]]", "])}>"),
+    ],
+)
 def test_get_completion_string(input_string, expected):
     assert get_completion_string(input_string) == expected
 
@@ -201,19 +220,22 @@ SCORE_MAP_2 = {
 }
 
 
-@pytest.mark.parametrize("completion_string, expected", [
-    ("", 0),
-    (")", 1),
-    ("]", 2),
-    ("}", 3),
-    (">", 4),
-    (")]", 7),
-    ("}}]])})]", 288957),
-    (")}>]})", 5566),
-    ("}}>}>))))", 1480781),
-    ("]]}}]}]}>", 995444),
-    ("])}>", 294),
-])
+@pytest.mark.parametrize(
+    "completion_string, expected",
+    [
+        ("", 0),
+        (")", 1),
+        ("]", 2),
+        ("}", 3),
+        (">", 4),
+        (")]", 7),
+        ("}}]])})]", 288957),
+        (")}>]})", 5566),
+        ("}}>}>))))", 1480781),
+        ("]]}}]}]}>", 995444),
+        ("])}>", 294),
+    ],
+)
 def test_calculate_completion_score(completion_string, expected):
     assert calculate_completion_score(completion_string) == expected
 
@@ -226,11 +248,14 @@ def calculate_completion_score(completion_string):
     return result
 
 
-@pytest.mark.parametrize("input_string, expected", [
-    ("", 0),
-    ("(", 1),
-    ("}", 0),
-    ("""
+@pytest.mark.parametrize(
+    "input_string, expected",
+    [
+        ("", 0),
+        ("(", 1),
+        ("}", 0),
+        (
+            """
 [({(<(())[]>[[{[]{<()<>>
 [(()[<>])]({[<{<<[]>>(
 {([(<{}[<>[]}>{[]{[(<()>
@@ -241,8 +266,11 @@ def calculate_completion_score(completion_string):
 [<(<(<(<{}))><([]([]()
 <{([([[(<>()){}]>(<<{{
 <{([{{}}[<[[[<>{}]]]>[]]
-    """, 288957),
-("""
+    """,
+            288957,
+        ),
+        (
+            """
 [{[{({}]{}}([{[{{{}}([]
 {<[[]]>}<{[{[{[]{()[[[]
 [<(<(<(<{}))><([]([]()
@@ -253,8 +281,11 @@ def calculate_completion_score(completion_string):
 {([(<{}[<>[]}>{[]{[(<()>
 (((({<>}<{<{<>}{[]{[]{}
 [[<[([]))<([[{}[[()]]]
-    """, 288957),
-])
+    """,
+            288957,
+        ),
+    ],
+)
 def test_score_lines_2(input_string, expected):
     assert score_lines_2(input_string) == expected
 
