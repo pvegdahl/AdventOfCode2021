@@ -8,15 +8,8 @@ def test_matrix():
     return [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 
 
-@pytest.mark.parametrize(
-    "input_string, expected",
-    [
-        ("", []),
-        ("123\n456\n789", [[1, 2, 3], [4, 5, 6], [7, 8, 9]]),
-    ],
-)
-def test_parse_input(input_string, expected):
-    assert parse_input(input_string) == expected
+def test_parse_input(test_matrix):
+    assert parse_input("123\n456\n789") == test_matrix
 
 
 def parse_input(input_string):
@@ -28,12 +21,15 @@ def parse_input(input_string):
     return result
 
 
+def test_add_one_to_everything(test_matrix):
+    assert add_one_to_everything(test_matrix) == [[2, 3, 4], [5, 6, 7], [8, 9, 10]]
 
-@pytest.mark.parametrize("matrix, expected", [
-])
-def test_add_one_to_everything(matrix, expected):
-    pass
 
+def add_one_to_everything(matrix: List[List[int]]) -> List[List[int]]:
+    result = []
+    for row in matrix:
+        result.append([x+1 for x in row])
+    return result
 
 
 def day11a(filepath: str) -> int:
