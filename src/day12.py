@@ -6,8 +6,13 @@ import pytest
 @pytest.mark.parametrize("input_string, expected", [
     ("", {}),
     ("A-B", {"A": {"B"}, "B": {"A"}}),
+    ("AB-cd", {"AB": {"cd"}, "cd": {"AB"}}),
     ("A-B\nc-d", {"A": {"B"}, "B": {"A"}, "c": {"d"}, "d": {"c"}}),
     ("A-B\nc-B", {"A": {"B"}, "B": {"A", "c"}, "c": {"B"}}),
+    ("start-B", {"start": {"B"}}),
+    ("B-start", {"start": {"B"}}),
+    ("A-end", {"A": {"end"}}),
+    ("end-A", {"A": {"end"}}),
 ])
 def test_parse_input(input_string, expected):
     assert parse_input(input_string) == expected
@@ -20,8 +25,10 @@ def parse_input(input_string):
 
     for line in input_string.strip().split("\n"):
         [location_a, location_b] = line.strip().split("-")
-        result[location_a].add(location_b)
-        result[location_b].add(location_a)
+        if location_a != "end" and location_b != "start":
+            result[location_a].add(location_b)
+        if location_a != "start" and location_b != "end":
+            result[location_b].add(location_a)
     return result
 
 
