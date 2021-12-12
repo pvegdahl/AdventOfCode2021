@@ -161,7 +161,8 @@ def test_run_n_cycles(cycles, expected_matrix, expected_flash_count, test_matrix
 
 
 def test_run_n_cycles_on_aoc_example():
-    matrix = parse_input("""5483143223
+    matrix = parse_input(
+        """5483143223
 2745854711
 5264556173
 6141336146
@@ -171,9 +172,11 @@ def test_run_n_cycles_on_aoc_example():
 6882881134
 4846848554
 5283751526
-""")
+"""
+    )
 
-    expected_matrix = parse_input("""0397666866
+    expected_matrix = parse_input(
+        """0397666866
 0749766918
 0053976933
 0004297822
@@ -183,7 +186,8 @@ def test_run_n_cycles_on_aoc_example():
 9322228966
 7922286866
 6789998766
-""")
+"""
+    )
 
     expected_count = 1656
     assert run_n_cycles(matrix=matrix, cycles=100) == (expected_matrix, expected_count)
@@ -228,18 +232,22 @@ def run_one_cycle(matrix: List[List[int]]) -> Tuple[List[List[int]], int]:
     )
 
 
-@pytest.mark.parametrize("matrix, expected", [
-    ([[9, 9], [9, 9]], 1),
-    ([[8, 8], [8, 8]], 2),
-    ([[8, 9], [8, 8]], 1),
-    ([[0, 0], [0, 0]], 0),
-])
+@pytest.mark.parametrize(
+    "matrix, expected",
+    [
+        ([[9, 9], [9, 9]], 1),
+        ([[8, 8], [8, 8]], 2),
+        ([[8, 9], [8, 8]], 1),
+        ([[0, 0], [0, 0]], 0),
+    ],
+)
 def test_find_first_everyone_flash(matrix, expected):
     assert find_first_everyone_flash(matrix) == expected
 
 
 def test_find_first_everyone_flash_aoc_example():
-    matrix = parse_input("""5483143223
+    matrix = parse_input(
+        """5483143223
 2745854711
 5264556173
 6141336146
@@ -249,7 +257,8 @@ def test_find_first_everyone_flash_aoc_example():
 6882881134
 4846848554
 5283751526
-""")
+"""
+    )
 
     expected_round = 195
     assert find_first_everyone_flash(matrix) == expected_round
