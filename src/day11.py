@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Tuple, Set
 
 import pytest
 
@@ -33,23 +33,58 @@ def add_one_to_everything(matrix: List[List[int]]) -> List[List[int]]:
     return result
 
 
-@pytest.mark.parametrize("threshold, expected", [
-    (300, []),
-    (9, []),
-    (8, [(2, 2)]),
-    (4, [(1, 1), (1, 2), (2, 0), (2, 1), (2, 2)]),
-])
+@pytest.mark.parametrize(
+    "threshold, expected",
+    [
+        (300, []),
+        (9, []),
+        (8, [(2, 2)]),
+        (4, [(1, 1), (1, 2), (2, 0), (2, 1), (2, 2)]),
+    ],
+)
 def test_find_cells_greater_than_threshold(threshold, expected, test_matrix):
-    assert sorted(find_cells_greater_than_threshold(matrix=test_matrix, threshold=threshold)) == sorted(expected)
+    assert sorted(
+        find_cells_greater_than_threshold(matrix=test_matrix, threshold=threshold)
+    ) == sorted(expected)
 
 
-def find_cells_greater_than_threshold(matrix: List[List[int]], threshold: int = 9) -> List[Tuple[int, int]]:
+def find_cells_greater_than_threshold(
+    matrix: List[List[int]], threshold: int = 9
+) -> List[Tuple[int, int]]:
     result = []
     for i in range(len(matrix)):
         for j in range(len(matrix[i])):
             if matrix[i][j] > threshold:
                 result.append((i, j))
     return result
+
+
+@pytest.mark.parametrize(
+    "x, y, expected",
+    [
+        (1, 1, {(0, 0), (0, 1), (0, 2), (1, 0), (1, 2), (2, 0), (2, 1), (2, 2)}),
+        (0, 0, {(0, 1), (1, 0), (1, 1)}),
+        (1, 0, {(0, 0), (0, 1), (1, 1), (2, 0), (2, 1)}),
+    ],
+)
+def test_find_neighbor_cells(x, y, expected, test_matrix):
+    assert find_neighbor_cells(matrix=test_matrix, x=x, y=y) == expected
+
+
+def find_neighbor_cells(
+    matrix: List[List[int]], x: int, y: int
+) -> Set[Tuple[int, int]]:
+    result = set()
+    for i in range(x - 1, x + 2):
+        for j in range(y - 1, y + 2):
+            if in_matrix(matrix=matrix, x=i, y=j):
+                result.add((i, j))
+    result.remove((x, y))
+    return result
+
+
+def in_matrix(matrix: List[List[int]], x: int, y: int) -> bool:
+    return 0 <= x < len(matrix) and 0 <= y < len(matrix[x])
 
 
 def day11a(filepath: str) -> int:
