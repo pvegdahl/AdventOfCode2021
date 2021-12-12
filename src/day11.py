@@ -43,7 +43,10 @@ def increment_everything(matrix: List[List[int]]) -> List[List[int]]:
     ],
 )
 def test_find_cells_greater_than_threshold(threshold, expected, test_matrix):
-    assert find_cells_greater_than_threshold(matrix=test_matrix, threshold=threshold) == expected
+    assert (
+        find_cells_greater_than_threshold(matrix=test_matrix, threshold=threshold)
+        == expected
+    )
 
 
 def find_cells_greater_than_threshold(
@@ -57,16 +60,24 @@ def find_cells_greater_than_threshold(
     return result
 
 
-@pytest.mark.parametrize("target_cells, expected", [
-    (set(), [[1, 2, 3], [4, 5, 6], [7, 8, 9]]),
-    ({(0, 0)}, [[2, 2, 3], [4, 5, 6], [7, 8, 9]]),
-    ({(1, 0), (2, 1), (0, 2)}, [[1, 2, 4], [5, 5, 6], [7, 9, 9]]),
-])
+@pytest.mark.parametrize(
+    "target_cells, expected",
+    [
+        (set(), [[1, 2, 3], [4, 5, 6], [7, 8, 9]]),
+        ({(0, 0)}, [[2, 2, 3], [4, 5, 6], [7, 8, 9]]),
+        ({(1, 0), (2, 1), (0, 2)}, [[1, 2, 4], [5, 5, 6], [7, 9, 9]]),
+    ],
+)
 def test_increment_target_cells(target_cells, expected, test_matrix):
-    assert increment_target_cells(matrix=test_matrix, target_cells=target_cells) == expected
+    assert (
+        increment_target_cells(matrix=test_matrix, target_cells=target_cells)
+        == expected
+    )
 
 
-def increment_target_cells(matrix: List[List[int]], target_cells: Set[Tuple[int, int]]) -> List[List[int]]:
+def increment_target_cells(
+    matrix: List[List[int]], target_cells: Set[Tuple[int, int]]
+) -> List[List[int]]:
     result = []
     for i in range(len(matrix)):
         new_row = []
@@ -79,16 +90,21 @@ def increment_target_cells(matrix: List[List[int]], target_cells: Set[Tuple[int,
     return result
 
 
-@pytest.mark.parametrize("target_cells, expected", [
-    (set(), [[1, 2, 3], [4, 5, 6], [7, 8, 9]]),
-    ({(0, 0)}, [[0, 2, 3], [4, 5, 6], [7, 8, 9]]),
-    ({(1, 0), (2, 1), (0, 2)}, [[1, 2, 0], [0, 5, 6], [7, 0, 9]]),
-])
+@pytest.mark.parametrize(
+    "target_cells, expected",
+    [
+        (set(), [[1, 2, 3], [4, 5, 6], [7, 8, 9]]),
+        ({(0, 0)}, [[0, 2, 3], [4, 5, 6], [7, 8, 9]]),
+        ({(1, 0), (2, 1), (0, 2)}, [[1, 2, 0], [0, 5, 6], [7, 0, 9]]),
+    ],
+)
 def test_reset_target_cells(target_cells, expected, test_matrix):
     assert reset_target_cells(matrix=test_matrix, target_cells=target_cells) == expected
 
 
-def reset_target_cells(matrix: List[List[int]], target_cells: Set[Tuple[int, int]]) -> List[List[int]]:
+def reset_target_cells(
+    matrix: List[List[int]], target_cells: Set[Tuple[int, int]]
+) -> List[List[int]]:
     result = []
     for i in range(len(matrix)):
         new_row = []
@@ -99,6 +115,7 @@ def reset_target_cells(matrix: List[List[int]], target_cells: Set[Tuple[int, int
             new_row.append(new_value)
         result.append(new_row)
     return result
+
 
 @pytest.mark.parametrize(
     "x, y, expected",
@@ -137,7 +154,10 @@ def in_matrix(matrix: List[List[int]], x: int, y: int) -> bool:
     ],
 )
 def test_run_n_cycles(cycles, expected_matrix, expected_flash_count, test_matrix):
-    assert run_n_cycles(matrix=test_matrix, cycles=cycles) == (expected_matrix, expected_flash_count)
+    assert run_n_cycles(matrix=test_matrix, cycles=cycles) == (
+        expected_matrix,
+        expected_flash_count,
+    )
 
 
 def run_n_cycles(matrix: List[List[int]], cycles: int) -> Tuple[List[List[int]], int]:
@@ -150,24 +170,15 @@ def run_n_cycles(matrix: List[List[int]], cycles: int) -> Tuple[List[List[int]],
 
 
 @pytest.mark.parametrize(
-    "matrix, expected",
+    "matrix, expected_matrix, expected_count",
     [
-        (
-                [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
-                ([[1, 1, 1], [1, 1, 1], [1, 1, 1]], 0)
-         ),
-        (
-                [[0, 0, 0], [0, 9, 0], [0, 0, 0]],
-                ([[2, 2, 2], [2, 0, 2], [2, 2, 2]], 1),
-        ),
-        (
-                [[1, 2, 3], [4, 5, 6], [7, 8, 9]],
-                ([[2, 3, 4], [6, 8, 9], [9, 0, 0]], 2)
-        ),
+        ([[0, 0, 0], [0, 0, 0], [0, 0, 0]], [[1, 1, 1], [1, 1, 1], [1, 1, 1]], 0),
+        ([[0, 0, 0], [0, 9, 0], [0, 0, 0]], [[2, 2, 2], [2, 0, 2], [2, 2, 2]], 1),
+        ([[1, 2, 3], [4, 5, 6], [7, 8, 9]], [[2, 3, 4], [6, 8, 9], [9, 0, 0]], 2),
     ],
 )
-def test_run_one_cycle(matrix, expected):
-    assert run_one_cycle(matrix=matrix) == expected
+def test_run_one_cycle(matrix, expected_matrix, expected_count):
+    assert run_one_cycle(matrix=matrix) == (expected_matrix, expected_count)
 
 
 def run_one_cycle(matrix: List[List[int]]) -> Tuple[List[List[int]], int]:
@@ -178,10 +189,14 @@ def run_one_cycle(matrix: List[List[int]]) -> Tuple[List[List[int]], int]:
         flasher = to_process.pop()
         if flasher not in flashed_cells:
             flashed_cells.add(flasher)
-            neighbors = find_neighbor_cells(matrix=matrix, x=flasher[0], y = flasher[1])
-            updated_matrix = increment_target_cells(matrix=updated_matrix, target_cells=neighbors)
+            neighbors = find_neighbor_cells(matrix=matrix, x=flasher[0], y=flasher[1])
+            updated_matrix = increment_target_cells(
+                matrix=updated_matrix, target_cells=neighbors
+            )
             to_process.update(find_cells_greater_than_threshold(updated_matrix))
-    return reset_target_cells(matrix=updated_matrix, target_cells=flashed_cells), len(flashed_cells)
+    return reset_target_cells(matrix=updated_matrix, target_cells=flashed_cells), len(
+        flashed_cells
+    )
 
 
 def day11a(filepath: str) -> int:
