@@ -1,13 +1,28 @@
+from collections import defaultdict
+
 import pytest
 
 
-@pytest.mark.parametrize("input_string, expected", [])
+@pytest.mark.parametrize("input_string, expected", [
+    ("", {}),
+    ("A-B", {"A": {"B"}, "B": {"A"}}),
+])
 def test_parse_input(input_string, expected):
     assert parse_input(input_string) == expected
 
 
 def parse_input(input_string):
-    pass
+    result = defaultdict(lambda: set())
+    if not input_string:
+        return result
+
+    [location_a, location_b] = input_string.strip().split("-")
+    result[location_a].add(location_b)
+    result[location_b].add(location_a)
+
+    # for line in input_string.strip().split("\n"):
+    #     pass
+    return result
 
 
 def part_a(filepath: str):
