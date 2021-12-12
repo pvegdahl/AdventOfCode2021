@@ -1,4 +1,5 @@
 from collections import defaultdict
+from typing import Set, Dict
 
 import pytest
 
@@ -21,7 +22,7 @@ def test_parse_input(input_string, expected):
     assert parse_input(input_string) == expected
 
 
-def parse_input(input_string):
+def parse_input(input_string) -> Dict[str, Set[str]]:
     result = defaultdict(lambda: set())
     if not input_string:
         return result
@@ -32,6 +33,28 @@ def parse_input(input_string):
             result[location_a].add(location_b)
         if location_a != "start" and location_b != "end":
             result[location_b].add(location_a)
+    return result
+
+
+@pytest.mark.parametrize(
+    "cave_map, expected",
+    [
+        ({"start": {"end"}}, {("start", "end")}),
+        ({"start": {"A"}, "A": {"end"}}, {("start", "A", "end")}),
+    ],
+)
+def test_find_paths(cave_map, expected):
+    assert find_paths(cave_map) == expected
+
+
+def find_paths(cave_map):
+    result = set()
+    current_position = "start"
+    path = [current_position]
+    while current_position != "end":
+        current_position = next(iter(cave_map[current_position]))
+        path.append(current_position)
+    result.add(tuple(path))
     return result
 
 
