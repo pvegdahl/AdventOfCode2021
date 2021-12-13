@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Set, Dict
+from typing import Set, Dict, Tuple
 
 import pytest
 
@@ -43,21 +43,26 @@ def parse_input(input_string) -> Dict[str, Set[str]]:
         ({"start": {"a"}, "a": {"end"}}, {("start", "a", "end")}),
         ({"start": {"a"}, "a": {"b"}, "b": {"end"}}, {("start", "a", "b", "end")}),
         ({"start": {"a", "b"}, "a": {"end"}, "b": {"end"}}, {("start", "a", "end"), ("start", "b", "end")}),
+        # ({"start": {"a", "b"}, "a": {"c", "end"}, "b": {"end"}, "c": {"a"}}, {("start", "a", "end"), ("start", "b", "end")}),
     ],
 )
 def test_find_paths(cave_map, expected):
     assert find_paths(cave_map) == expected
 
 
-def find_paths(cave_map):
-    result = set()
-    current_position = "start"
-    path = (current_position,)
-    while current_position != "end":
-        current_position = next(iter(cave_map[current_position]))
-        path = path + (current_position,)
-    result.add(path)
-    return result
+def find_paths(cave_map: Dict[str, Set[str]]) -> Set[Tuple[str, ...]]:
+    return find_paths_recursive(cave_map=cave_map, current_path=("start",))
+
+
+def find_paths_recursive(cave_map: Dict[str, Set[str]], current_path: Tuple[str, ...]) -> Set[Tuple[str, ...]]:
+    current_position = current_path[-1]
+    if current_position == "end":
+        return {current_path}
+
+    results = set()
+    for option in cave_map[current_position]:
+        results.update(find_paths_recursive(cave_map=cave_map, current_path=(current_path + (option,))))
+    return results
 
 
 def part_a(filepath: str):
