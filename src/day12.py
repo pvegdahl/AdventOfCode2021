@@ -40,7 +40,9 @@ def parse_input(input_string) -> Dict[str, Set[str]]:
     "cave_map, expected",
     [
         ({"start": {"end"}}, {("start", "end")}),
-        ({"start": {"A"}, "A": {"end"}}, {("start", "A", "end")}),
+        ({"start": {"a"}, "a": {"end"}}, {("start", "a", "end")}),
+        ({"start": {"a"}, "a": {"b"}, "b": {"end"}}, {("start", "a", "b", "end")}),
+        ({"start": {"a", "b"}, "a": {"end"}, "b": {"end"}}, {("start", "a", "end"), ("start", "b", "end")}),
     ],
 )
 def test_find_paths(cave_map, expected):
@@ -50,11 +52,11 @@ def test_find_paths(cave_map, expected):
 def find_paths(cave_map):
     result = set()
     current_position = "start"
-    path = [current_position]
+    path = (current_position,)
     while current_position != "end":
         current_position = next(iter(cave_map[current_position]))
-        path.append(current_position)
-    result.add(tuple(path))
+        path = path + (current_position,)
+    result.add(path)
     return result
 
 
