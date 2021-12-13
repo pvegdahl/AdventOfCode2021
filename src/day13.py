@@ -72,6 +72,20 @@ def parse_input_folds(input_string: str) -> List[Fold]:
     return result
 
 
+@pytest.mark.parametrize("points, dimension, coordinate, expected", [
+    (set(), "x", 3, set()),
+    ({Point(0, 0)}, "x", 3, {Point(0, 0)}),
+    ({Point(0, 0), Point(1, 1), Point(2, 2)}, "x", 3, {Point(0, 0), Point(1, 1), Point(2, 2)}),
+    ({Point(0, 0), Point(2, 0)}, "x", 1, {Point(0, 0)}),
+])
+def test_fold(points, dimension, coordinate, expected):
+    assert fold(points=points, dimension=dimension, coordinate=coordinate) == expected
+
+
+def fold(points: Set[Point], dimension: str, coordinate: int) -> Set[Point]:
+    return {point for point in points if point.x < coordinate}
+
+
 def part_a(filepath: str):
     with open(filepath, "r") as file:
         pass
