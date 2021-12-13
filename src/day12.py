@@ -111,6 +111,61 @@ def test_find_paths_aoc(input_text, expected_count):
     assert len(find_paths(parse_input(input_text))) == expected_count
 
 
+def can_visit_one_small_cave_twice(cave: str, current_path: Tuple[str, ...]):
+    if is_uppercase(cave) or cave not in current_path:
+        return True
+    small_caves = [c for c in current_path if not is_uppercase(c)]
+    small_caves_set = set(small_caves)
+    return len(small_caves) == len(small_caves_set)
+
+
+@pytest.mark.parametrize(
+    "input_text, expected_count",
+    [
+        (
+            """dc-end
+    HN-start
+    start-kj
+    dc-start
+    dc-HN
+    LN-dc
+    HN-end
+    kj-sa
+    kj-HN
+    kj-dc""",
+            103,
+        ),
+        (
+            """fs-end
+    he-DX
+    fs-he
+    start-DX
+    pj-DX
+    end-zg
+    zg-sl
+    zg-pj
+    pj-he
+    RW-he
+    fs-DX
+    pj-RW
+    zg-RW
+    start-pj
+    he-WI
+    zg-he
+    pj-fs
+    start-RW""",
+            3509,
+        ),
+    ],
+)
+def test_find_paths_aoc_part_b(input_text, expected_count):
+    cave_map = parse_input(input_text)
+    assert (
+        len(find_paths(cave_map=cave_map, eligible_cave=can_visit_one_small_cave_twice))
+        == expected_count
+    )
+
+
 def can_visit_small_caves_once(cave: str, current_path: Tuple[str, ...]):
     return is_uppercase(cave) or cave not in current_path
 
@@ -119,12 +174,19 @@ def is_uppercase(text: str) -> bool:
     return text == text.upper()
 
 
-def find_paths(cave_map: Dict[str, Set[str]], eligible_cave: Optional[Callable] = can_visit_small_caves_once) -> Set[Tuple[str, ...]]:
-    return find_paths_recursive(cave_map=cave_map, current_path=("start",), eligible_cave=eligible_cave)
+def find_paths(
+    cave_map: Dict[str, Set[str]],
+    eligible_cave: Optional[Callable] = can_visit_small_caves_once,
+) -> Set[Tuple[str, ...]]:
+    return find_paths_recursive(
+        cave_map=cave_map, current_path=("start",), eligible_cave=eligible_cave
+    )
 
 
 def find_paths_recursive(
-    cave_map: Dict[str, Set[str]], current_path: Tuple[str, ...], eligible_cave: Callable
+    cave_map: Dict[str, Set[str]],
+    current_path: Tuple[str, ...],
+    eligible_cave: Callable,
 ) -> Set[Tuple[str, ...]]:
     current_position = current_path[-1]
     if current_position == "end":
@@ -135,7 +197,9 @@ def find_paths_recursive(
         if eligible_cave(cave=cave, current_path=current_path):
             results.update(
                 find_paths_recursive(
-                    cave_map=cave_map, current_path=(current_path + (cave,)), eligible_cave=eligible_cave
+                    cave_map=cave_map,
+                    current_path=(current_path + (cave,)),
+                    eligible_cave=eligible_cave,
                 )
             )
     return results
@@ -148,7 +212,12 @@ def part_a(filepath: str):
 
 def part_b(filepath: str):
     with open(filepath, "r") as file:
-        pass
+        return len(
+            find_paths(
+                cave_map=parse_input(file.read()),
+                eligible_cave=can_visit_one_small_cave_twice,
+            )
+        )
 
 
 if __name__ == "__main__":
