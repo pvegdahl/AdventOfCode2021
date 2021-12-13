@@ -73,43 +73,44 @@ def parse_input_folds(input_string: str) -> List[Fold]:
 
 
 @pytest.mark.parametrize(
-    "points, dimension, coordinate, expected",
+    "points, a_fold, expected",
     [
-        (set(), "x", 3, set()),
-        ({Point(0, 0)}, "x", 3, {Point(0, 0)}),
+        (set(), Fold("x", 3), set()),
+        ({Point(0, 0)}, Fold("x", 3), {Point(0, 0)}),
         (
             {Point(0, 0), Point(1, 1), Point(2, 2)},
-            "x",
-            3,
+            Fold("x", 3),
             {Point(0, 0), Point(1, 1), Point(2, 2)},
         ),
-        ({Point(0, 0), Point(2, 0)}, "x", 1, {Point(0, 0)}),
-        ({Point(0, 0), Point(3, 0)}, "x", 2, {Point(0, 0), Point(1, 0)}),
+        ({Point(0, 0), Point(2, 0)}, Fold("x", 1), {Point(0, 0)}),
+        ({Point(0, 0), Point(3, 0)}, Fold("x", 2), {Point(0, 0), Point(1, 0)}),
         (
             {Point(1, 0), Point(4, 0), Point(5, 1), Point(6, 2)},
-            "x",
-            3,
+            Fold("x", 3),
             {Point(1, 0), Point(2, 0), Point(1, 1), Point(0, 2)},
         ),
     ],
 )
-def test_fold(points, dimension, coordinate, expected):
-    assert fold(points=points, dimension=dimension, coordinate=coordinate) == expected
+def test_fold(points, a_fold, expected):
+    assert fold(points=points, a_fold=a_fold) == expected
 
 
-def fold(points: Set[Point], dimension: str, coordinate: int) -> Set[Point]:
-    kept_points = {point for point in points if point.x < coordinate}
+def fold(points: Set[Point], a_fold: Fold) -> Set[Point]:
+    kept_points = {point for point in points if point.x < a_fold.coordinate}
     folded_points = {
-        Point(x=(2 * coordinate - point.x), y=point.y)
+        Point(x=(2 * a_fold.coordinate - point.x), y=point.y)
         for point in points
-        if point.x > coordinate
+        if point.x > a_fold.coordinate
     }
     return kept_points.union(folded_points)
 
 
 def part_a(filepath: str):
     with open(filepath, "r") as file:
-        pass
+        input_text = file.read()
+    points = parse_input_points(input_text)
+    a_fold = parse_input_folds(input_text)[0]
+    # return len(fold(points=points, dimension=fold.dimension, ))
 
 
 def part_b(filepath: str):
