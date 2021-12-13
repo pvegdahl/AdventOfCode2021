@@ -90,9 +90,9 @@ def parse_input_folds(input_string: str) -> List[Fold]:
             {Point(1, 0), Point(2, 0), Point(1, 1), Point(0, 2)},
         ),
         (
-                {Point(0, 1), Point(0, 4), Point(1, 5), Point(2, 6)},
-                Fold("y", 3),
-                {Point(0, 1), Point(0, 2), Point(1, 1), Point(2, 0)},
+            {Point(0, 1), Point(0, 4), Point(1, 5), Point(2, 6)},
+            Fold("y", 3),
+            {Point(0, 1), Point(0, 2), Point(1, 1), Point(2, 0)},
         ),
     ],
 )
@@ -188,13 +188,16 @@ def do_all_folds(input_string: str) -> Set[Point]:
     return points
 
 
-@pytest.mark.parametrize("points, expected", [
-    (set(), ""),
-    ({Point(0, 0)}, "#"),
-    ({Point(0, 0), Point(0, 1)}, "##"),
-    ({Point(0, 0), Point(1, 0)}, "#\n#"),
-    ({Point(0, 0), Point(1, 1)}, "#.\n.#"),
-])
+@pytest.mark.parametrize(
+    "points, expected",
+    [
+        (set(), ""),
+        ({Point(0, 0)}, "#"),
+        ({Point(0, 0), Point(0, 1)}, "##"),
+        ({Point(0, 0), Point(1, 0)}, "#\n#"),
+        ({Point(0, 0), Point(1, 1)}, "#.\n.#"),
+    ],
+)
 def test_print_output(points, expected):
     assert print_output(points) == expected
 
@@ -211,8 +214,8 @@ def print_output(points: Set[Point]) -> str:
     max_x = max([point.x for point in points])
     max_y = max([point.y for point in points])
     result = ""
-    for x in range(max_x+1):
-        for y in range(max_y+1):
+    for y in range(max_y + 1):
+        for x in range(max_x + 1):
             if Point(x, y) in points:
                 result += "#"
             else:
@@ -222,11 +225,14 @@ def print_output(points: Set[Point]) -> str:
 
 
 def test_print_output_aoc_example(aoc_result):
-    assert print_output(aoc_result) == """#####
+    assert (
+        print_output(aoc_result)
+        == """#####
 #...#
 #...#
 #...#
 #####"""
+    )
 
 
 def part_a(filepath: str):
