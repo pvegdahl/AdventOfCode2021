@@ -23,7 +23,7 @@ def test_parse_input(input_string, expected):
 
 
 def parse_input(input_string) -> Dict[str, Set[str]]:
-    result = defaultdict(lambda: set())
+    result = defaultdict(lambda: set())  # type: Dict[str, Set[str]]
     if not input_string:
         return result
 
@@ -176,7 +176,7 @@ def is_uppercase(text: str) -> bool:
 
 def find_paths(
     cave_map: Dict[str, Set[str]],
-    eligible_cave: Optional[Callable] = can_visit_small_caves_once,
+    eligible_cave: Callable = can_visit_small_caves_once,
 ) -> Set[Tuple[str, ...]]:
     return find_paths_recursive(
         cave_map=cave_map, current_path=("start",), eligible_cave=eligible_cave
