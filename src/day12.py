@@ -42,8 +42,14 @@ def parse_input(input_string) -> Dict[str, Set[str]]:
         ({"start": {"end"}}, {("start", "end")}),
         ({"start": {"a"}, "a": {"end"}}, {("start", "a", "end")}),
         ({"start": {"a"}, "a": {"b"}, "b": {"end"}}, {("start", "a", "b", "end")}),
-        ({"start": {"a", "b"}, "a": {"end"}, "b": {"end"}}, {("start", "a", "end"), ("start", "b", "end")}),
-        # ({"start": {"a", "b"}, "a": {"c", "end"}, "b": {"end"}, "c": {"a"}}, {("start", "a", "end"), ("start", "b", "end")}),
+        (
+            {"start": {"a", "b"}, "a": {"end"}, "b": {"end"}},
+            {("start", "a", "end"), ("start", "b", "end")},
+        ),
+        (
+            {"start": {"a", "b"}, "a": {"c", "end"}, "b": {"end"}, "c": {"a"}},
+            {("start", "a", "end"), ("start", "b", "end")},
+        ),
     ],
 )
 def test_find_paths(cave_map, expected):
@@ -54,14 +60,21 @@ def find_paths(cave_map: Dict[str, Set[str]]) -> Set[Tuple[str, ...]]:
     return find_paths_recursive(cave_map=cave_map, current_path=("start",))
 
 
-def find_paths_recursive(cave_map: Dict[str, Set[str]], current_path: Tuple[str, ...]) -> Set[Tuple[str, ...]]:
+def find_paths_recursive(
+    cave_map: Dict[str, Set[str]], current_path: Tuple[str, ...]
+) -> Set[Tuple[str, ...]]:
     current_position = current_path[-1]
     if current_position == "end":
         return {current_path}
 
     results = set()
     for option in cave_map[current_position]:
-        results.update(find_paths_recursive(cave_map=cave_map, current_path=(current_path + (option,))))
+        if option not in current_path:
+            results.update(
+                find_paths_recursive(
+                    cave_map=cave_map, current_path=(current_path + (option,))
+                )
+            )
     return results
 
 
