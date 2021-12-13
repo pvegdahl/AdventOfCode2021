@@ -239,11 +239,12 @@ def part_a(filepath: str):
 
 def part_b(filepath: str):
     with open(filepath, "r") as file:
-        pass
+        input_text = file.read()
+    return print_output(do_all_folds(input_text))
 
 
 if __name__ == "__main__":
     day = 13
     input_file = f"../puzzle_input/day{day}.txt"
     print(f"The answer to {day}A is: {part_a(input_file)}")
-    print(f"The answer to {day}B is: {part_b(input_file)}")
+    print(f"The answer to {day}B is:\n{part_b(input_file)}")
