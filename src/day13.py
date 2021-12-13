@@ -72,18 +72,39 @@ def parse_input_folds(input_string: str) -> List[Fold]:
     return result
 
 
-@pytest.mark.parametrize("points, dimension, coordinate, expected", [
-    (set(), "x", 3, set()),
-    ({Point(0, 0)}, "x", 3, {Point(0, 0)}),
-    ({Point(0, 0), Point(1, 1), Point(2, 2)}, "x", 3, {Point(0, 0), Point(1, 1), Point(2, 2)}),
-    ({Point(0, 0), Point(2, 0)}, "x", 1, {Point(0, 0)}),
-])
+@pytest.mark.parametrize(
+    "points, dimension, coordinate, expected",
+    [
+        (set(), "x", 3, set()),
+        ({Point(0, 0)}, "x", 3, {Point(0, 0)}),
+        (
+            {Point(0, 0), Point(1, 1), Point(2, 2)},
+            "x",
+            3,
+            {Point(0, 0), Point(1, 1), Point(2, 2)},
+        ),
+        ({Point(0, 0), Point(2, 0)}, "x", 1, {Point(0, 0)}),
+        ({Point(0, 0), Point(3, 0)}, "x", 2, {Point(0, 0), Point(1, 0)}),
+        (
+            {Point(1, 0), Point(4, 0), Point(5, 1), Point(6, 2)},
+            "x",
+            3,
+            {Point(1, 0), Point(2, 0), Point(1, 1), Point(0, 2)},
+        ),
+    ],
+)
 def test_fold(points, dimension, coordinate, expected):
     assert fold(points=points, dimension=dimension, coordinate=coordinate) == expected
 
 
 def fold(points: Set[Point], dimension: str, coordinate: int) -> Set[Point]:
-    return {point for point in points if point.x < coordinate}
+    kept_points = {point for point in points if point.x < coordinate}
+    folded_points = {
+        Point(x=(2 * coordinate - point.x), y=point.y)
+        for point in points
+        if point.x > coordinate
+    }
+    return kept_points.union(folded_points)
 
 
 def part_a(filepath: str):
