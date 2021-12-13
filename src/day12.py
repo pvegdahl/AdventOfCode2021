@@ -51,12 +51,16 @@ def parse_input(input_string) -> Dict[str, Set[str]]:
             {("start", "a", "end"), ("start", "b", "end")},
         ),
         (
-                {"start": {"a", "b"}, "a": {"c", "end"}, "b": {"end"}, "c": {"a", "end"}},
-                {("start", "a", "c", "end"), ("start", "a", "end"), ("start", "b", "end")},
+            {"start": {"a", "b"}, "a": {"c", "end"}, "b": {"end"}, "c": {"a", "end"}},
+            {("start", "a", "c", "end"), ("start", "a", "end"), ("start", "b", "end")},
         ),
         (
-                {"start": {"A", "b"}, "A": {"c", "end"}, "b": {"end"}, "c": {"A"}},
-                {("start", "A", "c", "A", "end"), ("start", "A", "end"), ("start", "b", "end")},
+            {"start": {"A", "b"}, "A": {"c", "end"}, "b": {"end"}, "c": {"A"}},
+            {
+                ("start", "A", "c", "A", "end"),
+                ("start", "A", "end"),
+                ("start", "b", "end"),
+            },
         ),
     ],
 )
@@ -67,7 +71,8 @@ def test_find_paths(cave_map, expected):
 @pytest.mark.parametrize(
     "input_text, expected_count",
     [
-        ("""dc-end
+        (
+            """dc-end
 HN-start
 start-kj
 dc-start
@@ -76,8 +81,11 @@ LN-dc
 HN-end
 kj-sa
 kj-HN
-kj-dc""", 19),
-        ("""fs-end
+kj-dc""",
+            19,
+        ),
+        (
+            """fs-end
 he-DX
 fs-he
 start-DX
@@ -94,8 +102,11 @@ start-pj
 he-WI
 zg-he
 pj-fs
-start-RW""", 226)
-    ])
+start-RW""",
+            226,
+        ),
+    ],
+)
 def test_find_paths_aoc(input_text, expected_count):
     assert len(find_paths(parse_input(input_text))) == expected_count
 
@@ -112,14 +123,18 @@ def find_paths_recursive(
         return {current_path}
 
     results = set()
-    for option in cave_map[current_position]:
-        if is_uppercase(option) or option not in current_path:
+    for cave in cave_map[current_position]:
+        if can_visit_cave(cave=cave, current_path=current_path):
             results.update(
                 find_paths_recursive(
-                    cave_map=cave_map, current_path=(current_path + (option,))
+                    cave_map=cave_map, current_path=(current_path + (cave,))
                 )
             )
     return results
+
+
+def can_visit_cave(cave: str, current_path: Tuple[str, ...]):
+    return is_uppercase(cave) or cave not in current_path
 
 
 def is_uppercase(text: str) -> bool:
