@@ -129,7 +129,7 @@ def fold_on_y(a_fold, points):
     return kept_points.union(folded_points)
 
 
-@pytest.fixture()
+@pytest.fixture
 def aoc_input_text() -> str:
     return """6,10
     0,14
@@ -154,8 +154,9 @@ def aoc_input_text() -> str:
     fold along x=5"""
 
 
-def test_do_all_folds(aoc_input_text):
-    assert do_all_folds(aoc_input_text) == {
+@pytest.fixture
+def aoc_result() -> Set[Point]:
+    return {
         Point(0, 0),
         Point(1, 0),
         Point(2, 0),
@@ -175,12 +176,57 @@ def test_do_all_folds(aoc_input_text):
     }
 
 
+def test_do_all_folds(aoc_input_text, aoc_result):
+    assert do_all_folds(aoc_input_text) == aoc_result
+
+
 def do_all_folds(input_string: str) -> Set[Point]:
     points = parse_input_points(input_string)
     folds = parse_input_folds(input_string)
     for a_fold in folds:
         points = fold(points=points, a_fold=a_fold)
     return points
+
+
+@pytest.mark.parametrize("points, expected", [
+    (set(), ""),
+    ({Point(0, 0)}, "#"),
+    ({Point(0, 0), Point(0, 1)}, "##"),
+    ({Point(0, 0), Point(1, 0)}, "#\n#"),
+    ({Point(0, 0), Point(1, 1)}, "#.\n.#"),
+])
+def test_print_output(points, expected):
+    assert print_output(points) == expected
+
+
+def print_output(points: Set[Point]) -> str:
+    if not points:
+        return ""
+
+    min_x = min([point.x for point in points])
+    assert min_x >= 0
+    min_y = min([point.y for point in points])
+    assert min_y >= 0
+
+    max_x = max([point.x for point in points])
+    max_y = max([point.y for point in points])
+    result = ""
+    for x in range(max_x+1):
+        for y in range(max_y+1):
+            if Point(x, y) in points:
+                result += "#"
+            else:
+                result += "."
+        result += "\n"
+    return result.strip()
+
+
+def test_print_output_aoc_example(aoc_result):
+    assert print_output(aoc_result) == """#####
+#...#
+#...#
+#...#
+#####"""
 
 
 def part_a(filepath: str):
