@@ -110,7 +110,7 @@ def part_a(filepath: str):
         input_text = file.read()
     points = parse_input_points(input_text)
     a_fold = parse_input_folds(input_text)[0]
-    # return len(fold(points=points, dimension=fold.dimension, ))
+    return len(fold(points=points, a_fold=a_fold))
 
 
 def part_b(filepath: str):
