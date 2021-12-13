@@ -20,8 +20,8 @@ def part_b(filepath: str):
         pass
 
 
-DAY = 0
-
 if __name__ == "__main__":
-    print(f"The answer to {DAY}A is: {part_a('../puzzle_input/day{DAY}.txt')}")
-    print(f"The answer to {DAY}B is: {part_b('../puzzle_input/day{DAY}.txt')}")
+    day = 0
+    input_file = f"../puzzle_input/day{day}.txt"
+    print(f"The answer to {day}A is: {part_a(input_file)}")
+    print(f"The answer to {day}B is: {part_b(input_file)}")
