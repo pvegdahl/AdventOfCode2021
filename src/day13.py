@@ -25,12 +25,12 @@ def test_parse_input_points(input_string, expected):
 
 
 def parse_input_points(input_string) -> Set[Point]:
+    if not input_string:
+        return set()
+
     result = set()
-    for line in input_string.strip().split("\n"):
-        if line:
-            result.add(Point.from_string(line))
-        else:
-            break
+    for line in input_string.strip().split("\n\n")[0].split("\n"):
+        result.add(Point.from_string(line))
     return result
 
 
