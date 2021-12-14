@@ -217,14 +217,25 @@ def get_most_common_letter_count(text: str) -> int:
     return max(count_letters(text).values())
 
 
+def test_find_max_min_difference(aoc_example_input):
+    assert find_max_min_difference(input_text=aoc_example_input, steps=10) == 1588
+
+
+def find_max_min_difference(input_text: str, steps: int) -> int:
+    polymer = parse_polymer_template(input_text)
+    insertion_rules = parse_insertion_rules(input_text)
+    final_polymer = run_n_steps(polymer=polymer, insertion_rules=insertion_rules, steps=steps)
+    return get_most_common_letter_count(final_polymer) - get_least_common_letter_count(final_polymer)
+
+
 def part_a(filepath: str):
     with open(filepath, "r") as file:
-        pass
+        return find_max_min_difference(input_text=file.read(), steps=10)
 
 
 def part_b(filepath: str):
     with open(filepath, "r") as file:
-        pass
+        return find_max_min_difference(input_text=file.read(), steps=40)
 
 
 if __name__ == "__main__":
