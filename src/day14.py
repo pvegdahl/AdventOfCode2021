@@ -25,6 +25,28 @@ def parse_polymer_template(input_string: str) -> str:
 
 
 @pytest.mark.parametrize(
+    "polymer, expected",
+    [
+        ("", {}),
+        ("AB", {"AB": 1, "B": 1}),
+        ("ABC", {"AB": 1, "BC": 1, "C": 1}),
+        ("ABCABCAB", {"AB": 3, "BC": 2, "CA": 2, "B": 1}),
+    ],
+)
+def test_parse_polymer_pair_dict(polymer, expected):
+    assert parse_polymer_pair_dict(polymer) == expected
+
+
+# This name is a little off.  It will record the count of all pairs, but also contain the final single element.  This
+# works for our purposes because that element will never morph, and it will make our counting at the end work.
+def parse_polymer_pair_dict(polymer: str) -> Dict[str, int]:
+    result = defaultdict(lambda: 0)
+    for i in range(len(polymer)):
+        result[polymer[i:i+2]] += 1
+    return result
+
+
+@pytest.mark.parametrize(
     "input_string, expected",
     [
         ("", {}),
@@ -119,6 +141,29 @@ def polymer_insertion(polymer: str, insertion_rules: Dict[str, str]):
     return result
 
 
+@pytest.mark.parametrize("polymer_dict, insertion_rules, expected", [
+    ({}, {"AB": "C"}, {}),
+    ({"AB": 1, "B": 1}, {"AB": "C"}, {"AC": 1, "CB": 1, "B": 1}),
+    ({"AB": 1, "B": 1, "DE": 55}, {"AB": "C"}, {"AC": 1, "CB": 1, "B": 1, "DE": 55}),
+])
+def test_polymer_insertion_on_dict(polymer_dict, insertion_rules, expected):
+    assert polymer_insertion_on_dict(polymer_dict=polymer_dict, insertion_rules=insertion_rules) == expected
+
+
+def polymer_insertion_on_dict(polymer_dict: Dict[str, int], insertion_rules: Dict[str, str]) -> Dict[str, int]:
+    result = defaultdict(lambda: 0)
+    for polymer_pair, count in polymer_dict.items():
+        if polymer_pair in insertion_rules:
+            new_char = insertion_rules[polymer_pair]
+            pair_a = f"{polymer_pair[0]}{new_char}"
+            pair_b = f"{new_char}{polymer_pair[1]}"
+            result[pair_a] += count
+            result[pair_b] += count
+        else:
+            result[polymer_pair] += count
+    return result
+
+
 @pytest.mark.parametrize(
     "steps, expected",
     [
@@ -177,9 +222,13 @@ def test_count_letters(text, expected):
 
 
 def count_letters(text: str) -> Dict[str, int]:
+    return count_letters_dict(parse_polymer_pair_dict(text))
+
+
+def count_letters_dict(polymer_dict: Dict[str, int]) -> Dict[str, int]:
     result = defaultdict(lambda: 0)
-    for letter in text:
-        result[letter] += 1
+    for pair, count in polymer_dict.items():
+        result[pair[0]] += count
     return result
 
 
