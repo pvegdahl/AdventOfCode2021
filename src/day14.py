@@ -42,7 +42,7 @@ def test_parse_polymer_pair_dict(polymer, expected):
 def parse_polymer_pair_dict(polymer: str) -> Dict[str, int]:
     result = defaultdict(lambda: 0)
     for i in range(len(polymer)):
-        result[polymer[i:i+2]] += 1
+        result[polymer[i : i + 2]] += 1
     return result
 
 
@@ -141,16 +141,30 @@ def polymer_insertion(polymer: str, insertion_rules: Dict[str, str]):
     return result
 
 
-@pytest.mark.parametrize("polymer_dict, insertion_rules, expected", [
-    ({}, {"AB": "C"}, {}),
-    ({"AB": 1, "B": 1}, {"AB": "C"}, {"AC": 1, "CB": 1, "B": 1}),
-    ({"AB": 1, "B": 1, "DE": 55}, {"AB": "C"}, {"AC": 1, "CB": 1, "B": 1, "DE": 55}),
-])
+@pytest.mark.parametrize(
+    "polymer_dict, insertion_rules, expected",
+    [
+        ({}, {"AB": "C"}, {}),
+        ({"AB": 1, "B": 1}, {"AB": "C"}, {"AC": 1, "CB": 1, "B": 1}),
+        (
+            {"AB": 1, "B": 1, "DE": 55},
+            {"AB": "C"},
+            {"AC": 1, "CB": 1, "B": 1, "DE": 55},
+        ),
+    ],
+)
 def test_polymer_insertion_on_dict(polymer_dict, insertion_rules, expected):
-    assert polymer_insertion_on_dict(polymer_dict=polymer_dict, insertion_rules=insertion_rules) == expected
+    assert (
+        polymer_insertion_on_dict(
+            polymer_dict=polymer_dict, insertion_rules=insertion_rules
+        )
+        == expected
+    )
 
 
-def polymer_insertion_on_dict(polymer_dict: Dict[str, int], insertion_rules: Dict[str, str]) -> Dict[str, int]:
+def polymer_insertion_on_dict(
+    polymer_dict: Dict[str, int], insertion_rules: Dict[str, str]
+) -> Dict[str, int]:
     result = defaultdict(lambda: 0)
     for polymer_pair, count in polymer_dict.items():
         if polymer_pair in insertion_rules:
@@ -207,6 +221,17 @@ def run_n_steps(polymer, insertion_rules, steps):
     return result
 
 
+def run_n_steps_dict(
+    polymer_dict: Dict[str, int], insertion_rules: Dict[str, str], steps: int
+) -> Dict[str, int]:
+    result = polymer_dict
+    for _ in range(steps):
+        result = polymer_insertion_on_dict(
+            polymer_dict=result, insertion_rules=insertion_rules
+        )
+    return result
+
+
 @pytest.mark.parametrize(
     "text, expected",
     [
@@ -246,7 +271,11 @@ def test_get_least_common_letter_count(text, expected):
 
 
 def get_least_common_letter_count(text: str) -> int:
-    return min(count_letters(text).values())
+    return get_least_common_letter_count_dict(parse_polymer_pair_dict(text))
+
+
+def get_least_common_letter_count_dict(polymer_dict: Dict[str, int]) -> int:
+    return min(count_letters_dict(polymer_dict).values())
 
 
 @pytest.mark.parametrize(
@@ -263,7 +292,11 @@ def test_get_most_common_letter_count(text, expected):
 
 
 def get_most_common_letter_count(text: str) -> int:
-    return max(count_letters(text).values())
+    return get_most_common_letter_count_dict(parse_polymer_pair_dict(text))
+
+
+def get_most_common_letter_count_dict(polymer_dict: Dict[str, int]) -> int:
+    return max(count_letters_dict(polymer_dict).values())
 
 
 def test_find_max_min_difference(aoc_example_input):
@@ -272,9 +305,14 @@ def test_find_max_min_difference(aoc_example_input):
 
 def find_max_min_difference(input_text: str, steps: int) -> int:
     polymer = parse_polymer_template(input_text)
+    polymer_dict = parse_polymer_pair_dict(polymer)
     insertion_rules = parse_insertion_rules(input_text)
-    final_polymer = run_n_steps(polymer=polymer, insertion_rules=insertion_rules, steps=steps)
-    return get_most_common_letter_count(final_polymer) - get_least_common_letter_count(final_polymer)
+    final_polymer_dict = run_n_steps_dict(
+        polymer_dict=polymer_dict, insertion_rules=insertion_rules, steps=steps
+    )
+    return get_most_common_letter_count_dict(
+        final_polymer_dict
+    ) - get_least_common_letter_count_dict(final_polymer_dict)
 
 
 def part_a(filepath: str):
