@@ -1,3 +1,6 @@
+from collections import defaultdict
+from typing import Dict
+
 import pytest
 
 
@@ -28,11 +31,29 @@ def test_parse_insertion_rules(input_string, expected):
     assert parse_insertion_rules(input_string) == expected
 
 
-def parse_insertion_rules(input_string):
-    result = {}
+def parse_insertion_rules(input_string: str) -> Dict[str, str]:
+    result = defaultdict(lambda: "")
     for line in input_string.strip().split("\n")[2:]:
         [key, value] = line.split(" -> ")
         result[key] = value
+    return result
+
+
+@pytest.mark.parametrize("polymer, insertion_rules, expected", [
+    ("AB", defaultdict(lambda: "", {"CD": "E"}), "AB"),
+    ("AB", defaultdict(lambda: "", {"AB": "C"}), "ACB"),
+    ("AB", defaultdict(lambda: "", {"AB": "C", "CB": "D"}), "ACB"),
+    ("ABC", defaultdict(lambda: "", {"AB": "C", "BC": "D"}), "ACBDC"),
+])
+def test_polymer_insertion(polymer, insertion_rules, expected):
+    assert polymer_insertion(polymer=polymer, insertion_rules=insertion_rules) == expected
+
+
+def polymer_insertion(polymer: str, insertion_rules: Dict[str, str]):
+    result = ""
+    for i in range(len(polymer)):
+        result += polymer[i]
+        result += insertion_rules[polymer[i:i+2]]
     return result
 
 
