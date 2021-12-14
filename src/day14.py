@@ -49,6 +49,40 @@ def test_polymer_insertion(polymer, insertion_rules, expected):
     assert polymer_insertion(polymer=polymer, insertion_rules=insertion_rules) == expected
 
 
+AOC_EXAMPLE_INPUT = """NNCB
+
+CH -> B
+HH -> N
+CB -> H
+NH -> C
+HB -> C
+HC -> B
+HN -> C
+NN -> C
+BH -> H
+NC -> B
+NB -> B
+BN -> B
+BB -> N
+BC -> B
+CC -> N
+CN -> C"""
+
+
+def test_polymer_insertion_aoc_example():
+    polymer = parse_polymer_template(AOC_EXAMPLE_INPUT)
+    insertion_rules = parse_insertion_rules(AOC_EXAMPLE_INPUT)
+    step_1_polymer = polymer_insertion(polymer=polymer, insertion_rules=insertion_rules)
+    assert step_1_polymer == "NCNBCHB"
+    step_2_polymer = polymer_insertion(polymer=step_1_polymer, insertion_rules=insertion_rules)
+    assert step_2_polymer == "NBCCNBBBCBHCB"
+    step_3_polymer = polymer_insertion(polymer=step_2_polymer, insertion_rules=insertion_rules)
+    assert step_3_polymer == "NBBBCNCCNBBNBNBBCHBHHBCHB"
+    step_4_polymer = polymer_insertion(polymer=step_3_polymer, insertion_rules=insertion_rules)
+    assert step_4_polymer == "NBBNBNBBCCNBCNCCNBBNBBNBBBNBBNBBCBHCBHHNHCBBCBHCB"
+
+
+
 def polymer_insertion(polymer: str, insertion_rules: Dict[str, str]):
     result = ""
     for i in range(len(polymer)):
