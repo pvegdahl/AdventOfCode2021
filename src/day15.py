@@ -1,4 +1,5 @@
 import functools
+import sys
 from typing import List, Tuple
 
 import pytest
@@ -91,7 +92,7 @@ def get_candidate_points(
                 (4, 5, 5, 6),
             ),
         ),
-        (((8,),), 3, ((8, 9, 0), (9, 0, 1), (0, 1, 2))),
+        (((8,),), 3, ((8, 9, 1), (9, 1, 2), (1, 2, 3))),
     ],
 )
 def test_build_multiplied_matrix(matrix, multiplier, expected):
@@ -106,9 +107,25 @@ def build_multiplied_matrix(
         for row in matrix:
             new_row = []
             for j in range(multiplier):
-                new_row.extend([(x + i + j) % 10 for x in row])
+                new_row.extend([weird_mod_ten(x + i + j) for x in row])
             list_matrix.append(new_row)
     return list_matrix_to_tuple_matrix(list_matrix)
+
+
+def weird_mod_ten(x: int) -> int:
+    result = x
+    while result > 9:
+        result -= 9
+    return result
+
+
+def test_find_best_path_on_multiplied_matrix(aoc_example_matrix):
+    assert find_best_path_on_multiplied_matrix(aoc_example_matrix) == 315
+
+
+def find_best_path_on_multiplied_matrix(matrix: Tuple[Tuple[int, ...], ...]) -> int:
+    multiplied_matrix = build_multiplied_matrix(matrix=matrix, multiplier=5)
+    return find_risk_of_best_route(matrix=multiplied_matrix, starting_point=Point(0, 0))
 
 
 def part_a(filepath: str):
@@ -119,7 +136,9 @@ def part_a(filepath: str):
 
 def part_b(filepath: str):
     with open(filepath, "r") as file:
-        pass
+        matrix = list_matrix_to_tuple_matrix(parse_digit_matrix(file.read()))
+    sys.setrecursionlimit(3000)
+    return find_best_path_on_multiplied_matrix(matrix)
 
 
 if __name__ == "__main__":
