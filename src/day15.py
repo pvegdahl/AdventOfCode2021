@@ -1,8 +1,9 @@
-from typing import List
+import functools
+from typing import List, Tuple
 
 import pytest
 
-from src.aoc_helpers import parse_digit_matrix, Point
+from src.aoc_helpers import parse_digit_matrix, Point, list_matrix_to_tuple_matrix
 
 
 @pytest.fixture
@@ -20,8 +21,8 @@ def aoc_example_text() -> str:
 
 
 @pytest.fixture
-def aoc_example_matrix(aoc_example_text) -> List[List[int]]:
-    return parse_digit_matrix(aoc_example_text)
+def aoc_example_matrix(aoc_example_text) -> Tuple[Tuple[int, ...], ...]:
+    return list_matrix_to_tuple_matrix(parse_digit_matrix(aoc_example_text))
 
 
 @pytest.mark.parametrize("starting_point, expected", [
@@ -37,7 +38,8 @@ def test_find_risk_of_best_route(starting_point, expected, aoc_example_matrix):
     assert find_risk_of_best_route(matrix=aoc_example_matrix, starting_point=starting_point) == expected
 
 
-def find_risk_of_best_route(matrix: List[List[int]], starting_point: Point) -> int:
+@functools.cache
+def find_risk_of_best_route(matrix: Tuple[Tuple[int, ...], ...], starting_point: Point) -> int:
     destination_point = Point(x=len(matrix)-1, y=len(matrix[-1])-1)
     if starting_point == destination_point:
         return 0
@@ -51,7 +53,7 @@ def find_risk_of_best_route(matrix: List[List[int]], starting_point: Point) -> i
     return lowest_score
 
 
-def get_candidate_points(matrix: List[List[int]], current_point: Point) -> List[Point]:
+def get_candidate_points(matrix: Tuple[Tuple[int, ...], ...], current_point: Point) -> List[Point]:
     result = []
     if (current_point.x + 1) < len(matrix):
         result.append(Point(x=current_point.x + 1, y=current_point.y))
@@ -60,10 +62,10 @@ def get_candidate_points(matrix: List[List[int]], current_point: Point) -> List[
     return result
 
 
-
 def part_a(filepath: str):
     with open(filepath, "r") as file:
-        pass
+        matrix = list_matrix_to_tuple_matrix(parse_digit_matrix(file.read()))
+    return find_risk_of_best_route(matrix=matrix, starting_point=Point(0, 0))
 
 
 def part_b(filepath: str):
