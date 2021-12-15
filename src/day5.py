@@ -3,15 +3,7 @@ from typing import List, NamedTuple, Set, Dict, Optional
 
 import pytest
 
-
-class Point(NamedTuple):
-    x: int
-    y: int
-
-    @classmethod
-    def from_string(cls, input_string: str) -> "Point":
-        [x, y] = [int(a) for a in input_string.split(",")]
-        return cls(x, y)
+from src.aoc_helpers import Point
 
 
 class LineSegment(NamedTuple):
