@@ -2,23 +2,12 @@ from typing import List, Tuple, Set
 
 import pytest
 
+from src.aoc_helpers import parse_digit_matrix
+
 
 @pytest.fixture()
 def test_matrix():
     return [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-
-
-def test_parse_input(test_matrix):
-    assert parse_input("123\n456\n789") == test_matrix
-
-
-def parse_input(input_string):
-    if not input_string:
-        return []
-    result = []
-    for line in input_string.strip().split("\n"):
-        result.append([int(char) for char in line.strip()])
-    return result
 
 
 def test_increment_everything(test_matrix):
@@ -161,7 +150,7 @@ def test_run_n_cycles(cycles, expected_matrix, expected_flash_count, test_matrix
 
 
 def test_run_n_cycles_on_aoc_example():
-    matrix = parse_input(
+    matrix = parse_digit_matrix(
         """5483143223
 2745854711
 5264556173
@@ -175,7 +164,7 @@ def test_run_n_cycles_on_aoc_example():
 """
     )
 
-    expected_matrix = parse_input(
+    expected_matrix = parse_digit_matrix(
         """0397666866
 0749766918
 0053976933
@@ -246,7 +235,7 @@ def test_find_first_everyone_flash(matrix, expected):
 
 
 def test_find_first_everyone_flash_aoc_example():
-    matrix = parse_input(
+    matrix = parse_digit_matrix(
         """5483143223
 2745854711
 5264556173
@@ -279,13 +268,13 @@ def any_non_zeros(matrix: List[List[int]]) -> bool:
 
 def day11a(filepath: str) -> int:
     with open(filepath, "r") as file:
-        matrix = parse_input(file.read())
+        matrix = parse_digit_matrix(file.read())
     return run_n_cycles(matrix=matrix, cycles=100)[1]
 
 
 def day11b(filepath: str) -> int:
     with open(filepath, "r") as file:
-        matrix = parse_input(file.read())
+        matrix = parse_digit_matrix(file.read())
     return find_first_everyone_flash(matrix)
 
 
