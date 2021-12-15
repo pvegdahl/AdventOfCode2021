@@ -1,6 +1,8 @@
 import functools
+import heapq
 import sys
-from typing import List, Tuple
+from collections import defaultdict
+from typing import List, Tuple, Dict, Set
 
 import pytest
 
@@ -66,6 +68,55 @@ def find_risk_of_best_route(
     return lowest_score
 
 
+def get_candidate_neighbors(node: Point, unvisited_nodes: Set[Point]) -> List[Point]:
+    x = node.x
+    y = node.y
+    return [
+        neighbor
+        for neighbor in [
+            Point(x + 1, y),
+            Point(x - 1, y),
+            Point(x, y + 1),
+            Point(x, y - 1),
+        ]
+        if neighbor in unvisited_nodes
+    ]
+
+
+def test_dijkstra(aoc_example_matrix):
+    assert dijkstra(aoc_example_matrix)[Point(9, 9)] == 40
+    assert (
+        dijkstra(build_multiplied_matrix(matrix=aoc_example_matrix, multiplier=5))[
+            Point(49, 49)
+        ]
+        == 315
+    )
+
+
+def dijkstra(matrix: Tuple[Tuple[int, ...], ...]) -> Dict[Point, int]:
+    unvisited_nodes = set()
+    for i in range(len(matrix)):
+        for j in range(len(matrix[i])):
+            unvisited_nodes.add(Point(i, j))
+    result = defaultdict(lambda: 1000000000000000)
+    result[Point(0, 0)] = 0
+    available_to_visit_heap = []
+    heapq.heappush(available_to_visit_heap, (0, Point(0, 0)))
+
+    while unvisited_nodes:
+        current_node_score, current_node = heapq.heappop(available_to_visit_heap)
+        if current_node in unvisited_nodes:
+            unvisited_nodes.remove(current_node)
+            candidates = get_candidate_neighbors(
+                node=current_node, unvisited_nodes=unvisited_nodes
+            )
+            for node in candidates:
+                score = min(current_node_score + matrix[node.x][node.y], result[node])
+                result[node] = score
+                heapq.heappush(available_to_visit_heap, (score, node))
+    return result
+
+
 def get_candidate_points(
     matrix: Tuple[Tuple[int, ...], ...], current_point: Point
 ) -> List[Point]:
@@ -125,7 +176,7 @@ def test_find_best_path_on_multiplied_matrix(aoc_example_matrix):
 
 def find_best_path_on_multiplied_matrix(matrix: Tuple[Tuple[int, ...], ...]) -> int:
     multiplied_matrix = build_multiplied_matrix(matrix=matrix, multiplier=5)
-    return find_risk_of_best_route(matrix=multiplied_matrix, starting_point=Point(0, 0))
+    return dijkstra(matrix=multiplied_matrix)[Point(499, 499)]
 
 
 def part_a(filepath: str):
@@ -137,7 +188,6 @@ def part_a(filepath: str):
 def part_b(filepath: str):
     with open(filepath, "r") as file:
         matrix = list_matrix_to_tuple_matrix(parse_digit_matrix(file.read()))
-    sys.setrecursionlimit(3000)
     return find_best_path_on_multiplied_matrix(matrix)
 
 
