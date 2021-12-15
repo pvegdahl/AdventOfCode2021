@@ -25,41 +25,90 @@ def aoc_example_matrix(aoc_example_text) -> Tuple[Tuple[int, ...], ...]:
     return list_matrix_to_tuple_matrix(parse_digit_matrix(aoc_example_text))
 
 
-@pytest.mark.parametrize("starting_point, expected", [
-    (Point(9, 9), 0),
-    (Point(9, 8), 1),
-    (Point(8, 8), 2),
-    (Point(9, 7), 2),
-    (Point(7, 9), 9),
-    (Point(8, 7), 4),
-    (Point(0, 0), 40),
-])
+@pytest.mark.parametrize(
+    "starting_point, expected",
+    [
+        (Point(9, 9), 0),
+        (Point(9, 8), 1),
+        (Point(8, 8), 2),
+        (Point(9, 7), 2),
+        (Point(7, 9), 9),
+        (Point(8, 7), 4),
+        (Point(0, 0), 40),
+    ],
+)
 def test_find_risk_of_best_route(starting_point, expected, aoc_example_matrix):
-    assert find_risk_of_best_route(matrix=aoc_example_matrix, starting_point=starting_point) == expected
+    assert (
+        find_risk_of_best_route(
+            matrix=aoc_example_matrix, starting_point=starting_point
+        )
+        == expected
+    )
 
 
 @functools.cache
-def find_risk_of_best_route(matrix: Tuple[Tuple[int, ...], ...], starting_point: Point) -> int:
-    destination_point = Point(x=len(matrix)-1, y=len(matrix[-1])-1)
+def find_risk_of_best_route(
+    matrix: Tuple[Tuple[int, ...], ...], starting_point: Point
+) -> int:
+    destination_point = Point(x=len(matrix) - 1, y=len(matrix[-1]) - 1)
     if starting_point == destination_point:
         return 0
 
     candidate_points = get_candidate_points(matrix=matrix, current_point=starting_point)
     lowest_score = 1e1000
     for point in candidate_points:
-        score = matrix[point.x][point.y] + find_risk_of_best_route(matrix=matrix, starting_point=point)
+        score = matrix[point.x][point.y] + find_risk_of_best_route(
+            matrix=matrix, starting_point=point
+        )
         if score < lowest_score:
             lowest_score = score
     return lowest_score
 
 
-def get_candidate_points(matrix: Tuple[Tuple[int, ...], ...], current_point: Point) -> List[Point]:
+def get_candidate_points(
+    matrix: Tuple[Tuple[int, ...], ...], current_point: Point
+) -> List[Point]:
     result = []
     if (current_point.x + 1) < len(matrix):
         result.append(Point(x=current_point.x + 1, y=current_point.y))
     if (current_point.y + 1) < len(matrix[0]):
         result.append(Point(x=current_point.x, y=current_point.y + 1))
     return result
+
+
+@pytest.mark.parametrize(
+    "matrix, multiplier, expected",
+    [
+        (((1,),), 1, ((1,),)),
+        (((1,),), 2, ((1, 2), (2, 3))),
+        (
+            ((1, 2), (3, 4)),
+            2,
+            (
+                (1, 2, 2, 3),
+                (3, 4, 4, 5),
+                (2, 3, 3, 4),
+                (4, 5, 5, 6),
+            ),
+        ),
+        (((8,),), 3, ((8, 9, 0), (9, 0, 1), (0, 1, 2))),
+    ],
+)
+def test_build_multiplied_matrix(matrix, multiplier, expected):
+    assert build_multiplied_matrix(matrix=matrix, multiplier=multiplier) == expected
+
+
+def build_multiplied_matrix(
+    matrix: Tuple[Tuple[int, ...], ...], multiplier: int
+) -> Tuple[Tuple[int, ...], ...]:
+    list_matrix = []
+    for i in range(multiplier):
+        for row in matrix:
+            new_row = []
+            for j in range(multiplier):
+                new_row.extend([(x + i + j) % 10 for x in row])
+            list_matrix.append(new_row)
+    return list_matrix_to_tuple_matrix(list_matrix)
 
 
 def part_a(filepath: str):
