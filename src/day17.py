@@ -1,5 +1,4 @@
-import math
-from typing import NamedTuple, Tuple, Optional, List, Set
+from typing import NamedTuple, Set
 
 import pytest
 
@@ -62,31 +61,6 @@ class Velocity(NamedTuple):
 )
 def test_velocity_one_step(velocity, expected):
     assert velocity.one_step() == expected
-
-
-def find_x_step_range(target_area: TargetArea) -> Optional[Tuple[int, int]]:
-    speed_for_min = math.ceil(initial_speed_for_final_x_position(target_area.min_x))
-    speed_for_max = math.floor(initial_speed_for_final_x_position(target_area.max_x))
-    if speed_for_max < speed_for_min:
-        return None
-    return speed_for_min, speed_for_max
-
-
-def initial_speed_for_final_x_position(final_position) -> float:
-    return (-1 + math.sqrt(1 + 8 * final_position)) / 2
-
-
-@pytest.mark.parametrize(
-    "target_area, expected",
-    [
-        (TargetArea(1, 1, 1, 1), (1, 1)),
-        (TargetArea(1, 2, 1, 1), (1, 1)),
-        (TargetArea(1, 3, 1, 1), (1, 2)),
-        (TargetArea(2, 2, 1, 1), None),
-    ],
-)
-def test_find_x_step_range(target_area, expected):
-    assert find_x_step_range(target_area) == expected
 
 
 def falls_in_target(target_area: TargetArea, velocity: Velocity) -> bool:
