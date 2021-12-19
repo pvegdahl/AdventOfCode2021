@@ -64,6 +64,11 @@ def explode(snail_fish_number):
             ExplosionSpec(index=(0, 0, 0, 0), left_value=9, right_value=8),
         ),
         (
+                (1, (2, (3, (4, (5, 6))))),
+                None,
+                ExplosionSpec(index=(1, 1, 1, 1), left_value=5, right_value=6),
+        ),
+        (
             (1, (2, (3, ((4, 5), 6)))),
             None,
             ExplosionSpec(index=(1, 1, 1, 0), left_value=4, right_value=5),
@@ -107,10 +112,33 @@ def find_first_explosion(
     return None
 
 
-def test_find_left_neighbor(
+def find_left_neighbor_index(
     snail_fish_number, index: Tuple[int, ...]
-) -> Tuple[int, ...]:
-    pass
+) -> Optional[Tuple[int, ...]]:
+    if not any(index):
+        return None
+    else:
+        last_one_at = find_index_of_last_value(index, 1)
+        left_index = index[0:last_one_at] + (0,)
+        # while is_tuple_at_location(snail_fish_number, left_index):
+        #     left_index += (1,)
+        return left_index
+
+
+def find_index_of_last_value(tt: Tuple[int, ...], target_value):
+    for i in reversed(range(len(tt))):
+        if tt[i] == target_value:
+            return i
+    return None
+
+
+@pytest.mark.parametrize("snail_fish_number, index, expected", [
+    ((((((1, 2), 3), 4), 5), 6), (0, 0, 0, 0), None),
+    ((1, (2, (3, (4, (5, 6))))), (1, 1, 1, 1), (1, 1, 1, 0)),
+    ((1, (2, (3, ((4, 5), 6)))), (1, 1, 1, 0), (1, 1, 0)),
+])
+def test_find_left_neighbor_index(snail_fish_number, index, expected):
+    assert find_left_neighbor_index(snail_fish_number=snail_fish_number, index=index) == expected
 
 
 def explode_recursive(
