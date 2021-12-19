@@ -120,9 +120,16 @@ def find_left_neighbor_index(
     else:
         last_one_at = find_index_of_last_value(index, 1)
         left_index = index[0:last_one_at] + (0,)
-        # while is_tuple_at_location(snail_fish_number, left_index):
-        #     left_index += (1,)
+        while is_tuple_at_location(snail_fish_number, left_index):
+            left_index += (1,)
         return left_index
+
+
+def is_tuple_at_location(snail_fish_number, index: Tuple[int, ...]):
+    value_at_index = snail_fish_number
+    for i in index:
+        value_at_index = value_at_index[i]
+    return isinstance(value_at_index, tuple)
 
 
 def find_index_of_last_value(tt: Tuple[int, ...], target_value):
@@ -136,6 +143,8 @@ def find_index_of_last_value(tt: Tuple[int, ...], target_value):
     ((((((1, 2), 3), 4), 5), 6), (0, 0, 0, 0), None),
     ((1, (2, (3, (4, (5, 6))))), (1, 1, 1, 1), (1, 1, 1, 0)),
     ((1, (2, (3, ((4, 5), 6)))), (1, 1, 1, 0), (1, 1, 0)),
+    ((1, (2, ((3, 4), ((4, 5), 6)))), (1, 1, 1, 0), (1, 1, 0, 1)),
+    (((1, (2, (3, 4))), ((((10, 9), 8), 7), 6)), (1, 0, 0, 0), (0, 1, 1, 1)),
 ])
 def test_find_left_neighbor_index(snail_fish_number, index, expected):
     assert find_left_neighbor_index(snail_fish_number=snail_fish_number, index=index) == expected
