@@ -243,19 +243,26 @@ def test_explode(snail_fish_number, expected):
     assert explode(snail_fish_number) == expected
 
 
-def split_sfn(snail_fish_number):
-    if isinstance(snail_fish_number, int):
-        if snail_fish_number >= 10:
-            return split_number(snail_fish_number)
-        else:
+class SplitSfnCommand:
+    def __init__(self):
+        self.split_count = 0
+
+    def split(self, snail_fish_number):
+        if self.split_count > 0:
             return snail_fish_number
-    return tuple(split_sfn(sub_number) for sub_number in snail_fish_number)
 
+        if isinstance(snail_fish_number, int):
+            if snail_fish_number >= 10:
+                return self.split_number(snail_fish_number)
+            else:
+                return snail_fish_number
+        return tuple(self.split(sub_number) for sub_number in snail_fish_number)
 
-def split_number(number):
-    a = math.floor(number / 2.0)
-    b = number - a
-    return a, b
+    def split_number(self, number):
+        self.split_count += 1
+        a = math.floor(number / 2.0)
+        b = number - a
+        return a, b
 
 
 @pytest.mark.parametrize("snail_fish_number, expected", [
@@ -269,7 +276,19 @@ def split_number(number):
     ((11, 12), ((5, 6), 12)),
 ])
 def test_split_sfn(snail_fish_number, expected):
-    assert split_sfn(snail_fish_number) == expected
+    assert SplitSfnCommand().split(snail_fish_number) == expected
+
+
+def sfn_add(sfn_a, sfn_b):
+    return sfn_a, sfn_b
+
+
+@pytest.mark.parametrize("sfn_a, sfn_b, expected", [
+    ((1, 2), (3, 4), ((1, 2), (3, 4))),
+    ((1, (2, (3, 4))), ((5, 6), 7), ((1, (2, (3, 4))), ((5, 6), 7))),
+])
+def test_sfn_add(sfn_a, sfn_b, expected):
+    assert sfn_add(sfn_a, sfn_b) == expected
 
 
 def part_a(filepath: str):
