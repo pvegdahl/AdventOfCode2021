@@ -265,16 +265,19 @@ class SplitSfnCommand:
         return a, b
 
 
-@pytest.mark.parametrize("snail_fish_number, expected", [
-    ((1, 2), (1, 2)),
-    ((10, 2), ((5, 5), 2)),
-    ((11, 2), ((5, 6), 2)),
-    ((1, 12), (1, (6, 6))),
-    ((1, 13), (1, (6, 7))),
-    ((1, (2, 10)), (1, (2, (5, 5)))),
-    ((1, (2, (3, 10))), (1, (2, (3, (5, 5))))),
-    ((11, 12), ((5, 6), 12)),
-])
+@pytest.mark.parametrize(
+    "snail_fish_number, expected",
+    [
+        ((1, 2), (1, 2)),
+        ((10, 2), ((5, 5), 2)),
+        ((11, 2), ((5, 6), 2)),
+        ((1, 12), (1, (6, 6))),
+        ((1, 13), (1, (6, 7))),
+        ((1, (2, 10)), (1, (2, (5, 5)))),
+        ((1, (2, (3, 10))), (1, (2, (3, (5, 5))))),
+        ((11, 12), ((5, 6), 12)),
+    ],
+)
 def test_split_sfn(snail_fish_number, expected):
     assert SplitSfnCommand().split(snail_fish_number) == expected
 
@@ -283,12 +286,46 @@ def sfn_add(sfn_a, sfn_b):
     return sfn_a, sfn_b
 
 
-@pytest.mark.parametrize("sfn_a, sfn_b, expected", [
-    ((1, 2), (3, 4), ((1, 2), (3, 4))),
-    ((1, (2, (3, 4))), ((5, 6), 7), ((1, (2, (3, 4))), ((5, 6), 7))),
-])
+@pytest.mark.parametrize(
+    "sfn_a, sfn_b, expected",
+    [
+        ((1, 2), (3, 4), ((1, 2), (3, 4))),
+        ((1, (2, (3, 4))), ((5, 6), 7), ((1, (2, (3, 4))), ((5, 6), 7))),
+    ],
+)
 def test_sfn_add(sfn_a, sfn_b, expected):
     assert sfn_add(sfn_a, sfn_b) == expected
+
+
+def sfn_reduce(sfn):
+    previous_sfn = None
+    while sfn != previous_sfn:
+        while sfn != previous_sfn:
+            previous_sfn = sfn
+            sfn = explode(previous_sfn)
+        sfn = SplitSfnCommand().split(sfn)
+    return sfn
+
+
+@pytest.mark.parametrize(
+    "sfn, expected",
+    [
+        ((1, 2), (1, 2)),
+        ((((((9, 8), 1), 2), 3), 4), ((((0, 9), 2), 3), 4)),
+        (
+            ((3, (2, (1, (7, 3)))), (6, (5, (4, (3, 2))))),
+            ((3, (2, (8, 0))), (9, (5, (7, 0)))),
+        ),
+        ((1, 13), (1, (6, 7))),
+        ((12, 13), ((6, 6), (6, 7))),
+        (
+            (((((4, 3), 4), 4), (7, ((8, 4), 9))), (1, 1)),
+            ((((0, 7), 4), ((7, 8), (6, 0))), (8, 1)),
+        ),
+    ],
+)
+def test_sfn_reduce(sfn, expected):
+    assert sfn_reduce(sfn) == expected
 
 
 def part_a(filepath: str):
