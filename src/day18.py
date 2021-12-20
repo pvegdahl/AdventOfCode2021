@@ -1,16 +1,31 @@
+import json
 import math
 from typing import Union, Tuple, NamedTuple, Optional, List
 
 import pytest
 
 
-@pytest.mark.parametrize("input_string, expected", [])
+@pytest.mark.parametrize("input_string, expected", [
+    ("1", [1]),
+    ("[1,2]", [(1, 2)]),
+    ("[[[7,1],2],3]\n[[1,7],7]", [(((7,1),2),3), ((1,7),7)])
+])
 def test_parse_input(input_string, expected):
     assert parse_input(input_string) == expected
 
 
-def parse_input(input_string):
-    pass
+def parse_input(input_string: str):
+    return [parse_line(line) for line in input_string.strip().split("\n")]
+
+
+def parse_line(line: str):
+    return nested_lists_to_nested_tuples(json.loads(line))
+
+
+def nested_lists_to_nested_tuples(as_list):
+    if not isinstance(as_list, List):
+        return as_list
+    return tuple(nested_lists_to_nested_tuples(i) for i in as_list)
 
 
 class ExplosionSpec(NamedTuple):
@@ -400,7 +415,8 @@ def test_do_homework():
 
 def part_a(filepath: str):
     with open(filepath, "r") as file:
-        pass
+        sfns = parse_input(file.read())
+    return do_homework(sfns)
 
 
 def part_b(filepath: str):
