@@ -1,5 +1,5 @@
 import math
-from typing import Union, Tuple, NamedTuple, Optional
+from typing import Union, Tuple, NamedTuple, Optional, List
 
 import pytest
 
@@ -326,6 +326,52 @@ def sfn_reduce(sfn):
 )
 def test_sfn_reduce(sfn, expected):
     assert sfn_reduce(sfn) == expected
+
+
+def add_and_reduce_many_sfns(sfns: List[Tuple]):
+    result = sfns[0]
+    for sfn in sfns[1:]:
+        result = sfn_reduce(sfn_add(result, sfn))
+    return result
+
+
+def test_add_and_reduce_many_sfns():
+    assert (
+        add_and_reduce_many_sfns(
+            [
+                (((0, (4, 5)), (0, 0)), (((4, 5), (2, 6)), (9, 5))),
+                (7, (((3, 7), (4, 3)), ((6, 3), (8, 8)))),
+                ((2, ((0, 8), (3, 4))), (((6, 7), 1), (7, (1, 6)))),
+                ((((2, 4), 7), (6, (0, 5))), (((6, 8), (2, 8)), ((2, 1), (4, 5)))),
+                (7, (5, ((3, 8), (1, 4)))),
+                ((2, (2, 2)), (8, (8, 1))),
+                (2, 9),
+                (1, (((9, 3), 9), ((9, 0), (0, 7)))),
+                (((5, (7, 4)), 7), 1),
+                ((((4, 2), 2), 6), (8, 7)),
+            ]
+        )
+        == ((((8, 7), (7, 7)), ((8, 6), (7, 7))), (((0, 7), (6, 6)), (8, 7)))
+    )
+
+
+def sfn_magnitude(sfn):
+    if isinstance(sfn, int):
+        return sfn
+    return 3 * sfn_magnitude(sfn[0]) + 2 * sfn_magnitude(sfn[1])
+
+
+@pytest.mark.parametrize(
+    "sfn, expected",
+    [
+        ((1, 2), 7),
+        ((9, 1), 29),
+        (((1, 2), ((3, 4), 5)), 143),
+        (((((8, 7), (7, 7)), ((8, 6), (7, 7))), (((0, 7), (6, 6)), (8, 7))), 3488),
+    ],
+)
+def test_sfn_magnitude(sfn, expected):
+    assert sfn_magnitude(sfn) == expected
 
 
 def part_a(filepath: str):
