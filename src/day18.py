@@ -244,11 +244,12 @@ def test_explode(snail_fish_number, expected):
 
 
 def split_sfn(snail_fish_number):
-    if snail_fish_number[0] >= 10:
-        return split_number(snail_fish_number[0]), snail_fish_number[1]
-    if snail_fish_number[1] >= 10:
-        return snail_fish_number[0], split_number(snail_fish_number[1])
-    return snail_fish_number
+    if isinstance(snail_fish_number, int):
+        if snail_fish_number >= 10:
+            return split_number(snail_fish_number)
+        else:
+            return snail_fish_number
+    return tuple(split_sfn(sub_number) for sub_number in snail_fish_number)
 
 
 def split_number(number):
@@ -264,6 +265,8 @@ def split_number(number):
     ((1, 12), (1, (6, 6))),
     ((1, 13), (1, (6, 7))),
     ((1, (2, 10)), (1, (2, (5, 5)))),
+    ((1, (2, (3, 10))), (1, (2, (3, (5, 5))))),
+    ((11, 12), ((5, 6), 12)),
 ])
 def test_split_sfn(snail_fish_number, expected):
     assert split_sfn(snail_fish_number) == expected
