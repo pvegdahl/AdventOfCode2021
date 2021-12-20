@@ -18,12 +18,6 @@ class ExplosionSpec(NamedTuple):
     right_value: int
 
 
-def explode(snail_fish_number):
-    explosion_spec = find_first_explosion(snail_fish_number)
-    if not explosion_spec:
-        return snail_fish_number
-
-
 @pytest.mark.parametrize(
     "snail_fish_number, index_so_far, expected",
     [
@@ -64,9 +58,9 @@ def explode(snail_fish_number):
             ExplosionSpec(index=(0, 0, 0, 0), left_value=9, right_value=8),
         ),
         (
-                (1, (2, (3, (4, (5, 6))))),
-                None,
-                ExplosionSpec(index=(1, 1, 1, 1), left_value=5, right_value=6),
+            (1, (2, (3, (4, (5, 6))))),
+            None,
+            ExplosionSpec(index=(1, 1, 1, 1), left_value=5, right_value=6),
         ),
         (
             (1, (2, (3, ((4, 5), 6)))),
@@ -126,10 +120,17 @@ def find_left_neighbor_index(
 
 
 def is_tuple_at_location(snail_fish_number, index: Tuple[int, ...]):
+    value_at_index = get_value_at_index(
+        snail_fish_number=snail_fish_number, index=index
+    )
+    return isinstance(value_at_index, tuple)
+
+
+def get_value_at_index(snail_fish_number, index):
     value_at_index = snail_fish_number
     for i in index:
         value_at_index = value_at_index[i]
-    return isinstance(value_at_index, tuple)
+    return value_at_index
 
 
 def find_index_of_last_value(tt: Tuple[int, ...], target_value):
@@ -139,38 +140,85 @@ def find_index_of_last_value(tt: Tuple[int, ...], target_value):
     return None
 
 
-@pytest.mark.parametrize("snail_fish_number, index, expected", [
-    ((((((1, 2), 3), 4), 5), 6), (0, 0, 0, 0), None),
-    ((1, (2, (3, (4, (5, 6))))), (1, 1, 1, 1), (1, 1, 1, 0)),
-    ((1, (2, (3, ((4, 5), 6)))), (1, 1, 1, 0), (1, 1, 0)),
-    ((1, (2, ((3, 4), ((4, 5), 6)))), (1, 1, 1, 0), (1, 1, 0, 1)),
-    (((1, (2, (3, 4))), ((((10, 9), 8), 7), 6)), (1, 0, 0, 0), (0, 1, 1, 1)),
-])
+@pytest.mark.parametrize(
+    "snail_fish_number, index, expected",
+    [
+        ((((((1, 2), 3), 4), 5), 6), (0, 0, 0, 0), None),
+        ((1, (2, (3, (4, (5, 6))))), (1, 1, 1, 1), (1, 1, 1, 0)),
+        ((1, (2, (3, ((4, 5), 6)))), (1, 1, 1, 0), (1, 1, 0)),
+        ((1, (2, ((3, 4), ((4, 5), 6)))), (1, 1, 1, 0), (1, 1, 0, 1)),
+        (((1, (2, (3, 4))), ((((10, 9), 8), 7), 6)), (1, 0, 0, 0), (0, 1, 1, 1)),
+    ],
+)
 def test_find_left_neighbor_index(snail_fish_number, index, expected):
-    assert find_left_neighbor_index(snail_fish_number=snail_fish_number, index=index) == expected
+    assert (
+        find_left_neighbor_index(snail_fish_number=snail_fish_number, index=index)
+        == expected
+    )
 
 
-def explode_recursive(
-    snail_fish_number, depth: int = 0
-) -> Tuple[Union[Tuple, int], int]:
-    if isinstance(snail_fish_number, int):
-        return snail_fish_number, 0
-    elif depth == 4:
-        return 0, snail_fish_number[1]
+def find_right_neighbor_index(snail_fish_number, index: Tuple[int, ...]):
+    if all(index):
+        return None
     else:
-        result = []
-        for sub_sfn in snail_fish_number:
-            new_sub_sfn, explode_right = explode_recursive(
-                snail_fish_number=sub_sfn, depth=depth + 1
-            )
-            result.append(new_sub_sfn)
-        return (
-            tuple(
-                explode_recursive(snail_fish_number=sub_sfn, depth=depth + 1)
-                for sub_sfn in snail_fish_number
-            ),
-            0,
+        last_zero_at = find_index_of_last_value(index, 0)
+        left_index = index[:last_zero_at] + (1,)
+        while is_tuple_at_location(snail_fish_number, left_index):
+            left_index += (0,)
+        return left_index
+
+
+@pytest.mark.parametrize(
+    "snail_fish_number, index, expected",
+    [
+        ((((((1, 2), 3), 4), 5), 6), (0, 0, 0, 0), (0, 0, 0, 1)),
+        ((1, (2, (3, (4, (5, 6))))), (1, 1, 1, 1), None),
+        ((1, (2, (3, ((4, 5), 6)))), (1, 1, 1, 0), (1, 1, 1, 1)),
+        ((1, (2, ((3, 4), ((4, 5), 6)))), (1, 1, 1, 0), (1, 1, 1, 1)),
+        (((1, (2, (3, 4))), ((((10, 9), 8), 7), 6)), (1, 0, 0, 0), (1, 0, 0, 1)),
+    ],
+)
+def test_find_right_neighbor_index(snail_fish_number, index, expected):
+    assert (
+        find_right_neighbor_index(snail_fish_number=snail_fish_number, index=index)
+        == expected
+    )
+
+
+class ExplodeReplaceCommand:
+    def __init__(self, spec: ExplosionSpec, snail_fish_number):
+        self.snail_fish_number = snail_fish_number
+        self.explosion_spec = spec
+        self.left_index = find_left_neighbor_index(
+            snail_fish_number=snail_fish_number, index=spec.index
         )
+        self.right_index = find_right_neighbor_index(
+            snail_fish_number=snail_fish_number, index=spec.index
+        )
+
+    def get_value(self, index: Tuple[int, ...]) -> Union[Tuple, int]:
+        if index == self.explosion_spec.index:
+            return 0
+
+        value_at_index = get_value_at_index(
+            snail_fish_number=self.snail_fish_number, index=index
+        )
+        if index == self.left_index:
+            return value_at_index + self.explosion_spec.left_value
+        if index == self.right_index:
+            return value_at_index + self.explosion_spec.right_value
+        if isinstance(value_at_index, int):
+            return value_at_index
+        return tuple(self.get_value(index + (i,)) for i in range(len(value_at_index)))
+
+
+def explode(snail_fish_number, index_so_far: Tuple[int, ...] = None):
+    explosion_spec = find_first_explosion(snail_fish_number)
+    if not explosion_spec:
+        return snail_fish_number
+    return ExplodeReplaceCommand(
+        spec=explosion_spec, snail_fish_number=snail_fish_number
+    ).get_value(tuple())
 
 
 @pytest.mark.parametrize(
@@ -178,6 +226,16 @@ def explode_recursive(
     [
         (((((0, 1), 2), 3), 4), ((((0, 1), 2), 3), 4)),
         ((((((9, 8), 1), 2), 3), 4), ((((0, 9), 2), 3), 4)),
+        ((7, (6, (5, (4, (3, 2))))), (7, (6, (5, (7, 0))))),
+        (((6, (5, (4, (3, 2)))), 1), ((6, (5, (7, 0))), 3)),
+        (
+            ((3, (2, (1, (7, 3)))), (6, (5, (4, (3, 2))))),
+            ((3, (2, (8, 0))), (9, (5, (4, (3, 2))))),
+        ),
+        (
+            ((3, (2, (8, 0))), (9, (5, (4, (3, 2))))),
+            ((3, (2, (8, 0))), (9, (5, (7, 0)))),
+        ),
     ],
 )
 def test_explode(snail_fish_number, expected):
