@@ -1,3 +1,4 @@
+import math
 from typing import Union, Tuple, NamedTuple, Optional
 
 import pytest
@@ -240,6 +241,32 @@ def explode(snail_fish_number, index_so_far: Tuple[int, ...] = None):
 )
 def test_explode(snail_fish_number, expected):
     assert explode(snail_fish_number) == expected
+
+
+def split_sfn(snail_fish_number):
+    if snail_fish_number[0] >= 10:
+        return split_number(snail_fish_number[0]), snail_fish_number[1]
+    if snail_fish_number[1] >= 10:
+        return snail_fish_number[0], split_number(snail_fish_number[1])
+    return snail_fish_number
+
+
+def split_number(number):
+    a = math.floor(number / 2.0)
+    b = number - a
+    return a, b
+
+
+@pytest.mark.parametrize("snail_fish_number, expected", [
+    ((1, 2), (1, 2)),
+    ((10, 2), ((5, 5), 2)),
+    ((11, 2), ((5, 6), 2)),
+    ((1, 12), (1, (6, 6))),
+    ((1, 13), (1, (6, 7))),
+    ((1, (2, 10)), (1, (2, (5, 5)))),
+])
+def test_split_sfn(snail_fish_number, expected):
+    assert split_sfn(snail_fish_number) == expected
 
 
 def part_a(filepath: str):
