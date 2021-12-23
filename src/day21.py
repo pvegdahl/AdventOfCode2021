@@ -6,31 +6,42 @@ import pytest
 class GameState(NamedTuple):
     roll_count: int = 0
     position_one: int = 1
+    score_one: int = 0
 
 
-@pytest.mark.parametrize("initial_game_state, expected_roll_count", [
+@pytest.mark.parametrize("initial_game_state, expected", [
     (GameState(roll_count=0), 3),
     (GameState(roll_count=3), 6),
     (GameState(roll_count=369), 372),
 ])
-def test_roll_count_updated(initial_game_state, expected_roll_count):
-    assert one_turn(initial_game_state).roll_count == expected_roll_count
+def test_roll_count_updated(initial_game_state, expected):
+    assert one_turn(initial_game_state).roll_count == expected
 
 
-@pytest.mark.parametrize("initial_game_state, expected_position_one", [
+@pytest.mark.parametrize("initial_game_state, expected", [
     (GameState(position_one=1, roll_count=0), 7),
     (GameState(position_one=10, roll_count=0), 6),
     (GameState(position_one=10, roll_count=10), 6),
     (GameState(position_one=10, roll_count=1000), 6),
     (GameState(position_one=3, roll_count=123), 8),
 ])
-def test_position_one_updated(initial_game_state, expected_position_one):
-    assert one_turn(initial_game_state).position_one == expected_position_one
+def test_position_one_updated(initial_game_state, expected):
+    assert one_turn(initial_game_state).position_one == expected
+
+
+@pytest.mark.parametrize("initial_game_state, expected", [
+    (GameState(position_one=1, roll_count=0, score_one=0), 7),
+    (GameState(position_one=1, roll_count=0, score_one=10), 17),
+    (GameState(position_one=3, roll_count=123, score_one=123), 131),
+])
+def test_score_one_updated(initial_game_state, expected):
+    assert one_turn(initial_game_state).score_one == expected
 
 
 def one_turn(initial_game_state: GameState) -> GameState:
     new_position_one = calculate_new_position_one(initial_game_state)
-    return GameState(roll_count=initial_game_state.roll_count+3, position_one=new_position_one)
+    new_score_one = initial_game_state.score_one + new_position_one
+    return GameState(roll_count=initial_game_state.roll_count+3, position_one=new_position_one, score_one=new_score_one)
 
 
 def calculate_new_position_one(initial_game_state):
