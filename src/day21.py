@@ -9,14 +9,6 @@ class PlayerState(NamedTuple):
     position: int = 1
     score: int = 0
 
-    def one_quantum_roll(self) -> List["PlayerState"]:
-        result = []
-        for roll in (1, 2, 3):
-            new_pos = special_mod10(self.position + roll)
-            new_score = self.score + new_pos
-            result.append(PlayerState(position=new_pos, score=new_score))
-        return result
-
     def one_quantum_turn(self) -> Dict["PlayerState", int]:
         result = defaultdict(lambda: 0)
         for roll, count in roll_histogram().items():
@@ -28,15 +20,6 @@ class PlayerState(NamedTuple):
         new_pos = special_mod10(self.position + roll)
         new_score = self.score + new_pos
         return PlayerState(position=new_pos, score=new_score)
-
-
-@pytest.mark.parametrize("player_state, expected", [
-    (PlayerState(), [PlayerState(position=2, score=2), PlayerState(position=3, score=3), PlayerState(position=4, score=4)]),
-    (PlayerState(position=9, score=51),
-     [PlayerState(position=10, score=61), PlayerState(position=1, score=52), PlayerState(position=2, score=53)]),
-])
-def test_one_quantum_roll(player_state, expected):
-    assert player_state.one_quantum_roll() == expected
 
 
 @functools.cache
