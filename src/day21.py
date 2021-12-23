@@ -75,8 +75,13 @@ def test_score_zero_updated(initial_game_state, expected):
 def test_player_zero_not_updated_on_player_one_turn():
     initial_game_state = GameState.factory(player_turn=1)
     next_game_state = one_turn(initial_game_state)
-    assert next_game_state.score_zero() == initial_game_state.score_zero()
-    assert next_game_state.position_zero() == initial_game_state.position_zero()
+    assert next_game_state.player_states[0] == initial_game_state.player_states[0]
+
+
+def test_player_one_not_updated_on_player_zero_turn():
+    initial_game_state = GameState(player_states=(PlayerState(), PlayerState()))
+    next_game_state = one_turn(initial_game_state)
+    assert next_game_state.player_states[1] == initial_game_state.player_states[1]
 
 
 @pytest.mark.parametrize(
@@ -94,32 +99,33 @@ def test_turn_alternates(initial_player_turn, expected):
 
 
 def one_turn(initial_game_state: GameState) -> GameState:
-    if initial_game_state.player_turn == 0:
-        new_position_zero = calculate_new_position_zero(initial_game_state)
-        new_score_zero = initial_game_state.score_zero() + new_position_zero
-        return GameState.factory(
-            roll_count=calculate_new_roll_count(initial_game_state),
-            pos_zero=new_position_zero,
-            score_zero=new_score_zero,
-            player_turn=1,
-        )
-    else:
-        return initial_game_state._replace(player_turn=0)
+    result_player_states = []
+    for i in range(len(initial_game_state.player_states)):
+        if i == initial_game_state.player_turn:
+            result_player_states.append(calculate_new_player_state(initial_game_state, i))
+        else:
+            result_player_states.append(initial_game_state.player_states[i])
+    return GameState(
+        roll_count=calculate_new_roll_count(initial_game_state),
+        player_states=tuple(result_player_states),
+        player_turn=(initial_game_state.player_turn+1) % 2)
 
 
 def calculate_new_roll_count(initial_game_state):
     return initial_game_state.roll_count + 3
 
 
-def calculate_new_position_zero(initial_game_state):
-    roll_total = calculate_roll_total(initial_game_state)
-    new_position_zero = special_mod10(initial_game_state.position_zero() + roll_total)
-    return new_position_zero
+def calculate_new_position(current_position: int, roll_count: int):
+    roll_total = 3 * roll_count + 6
+    new_position = special_mod10(current_position + roll_total)
+    return new_position
 
 
-def calculate_roll_total(initial_game_state):
-    roll_total = 3 * initial_game_state.roll_count + 6
-    return roll_total
+def calculate_new_player_state(game_state: GameState, player_id: int) -> PlayerState:
+    player_state = game_state.player_states[player_id]
+    new_position = calculate_new_position(current_position=player_state.position, roll_count=game_state.roll_count)
+    new_score = player_state.score + new_position
+    return PlayerState(position=new_position, score=new_score)
 
 
 def special_mod10(number: int) -> int:
