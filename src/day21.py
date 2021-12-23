@@ -10,31 +10,40 @@ class GameState(NamedTuple):
     player_turn: int = 1
 
 
-@pytest.mark.parametrize("initial_game_state, expected", [
-    (GameState(roll_count=0), 3),
-    (GameState(roll_count=3), 6),
-    (GameState(roll_count=369), 372),
-])
+@pytest.mark.parametrize(
+    "initial_game_state, expected",
+    [
+        (GameState(roll_count=0), 3),
+        (GameState(roll_count=3), 6),
+        (GameState(roll_count=369), 372),
+    ],
+)
 def test_roll_count_updated(initial_game_state, expected):
     assert one_turn(initial_game_state).roll_count == expected
 
 
-@pytest.mark.parametrize("initial_game_state, expected", [
-    (GameState(position_one=1, roll_count=0), 7),
-    (GameState(position_one=10, roll_count=0), 6),
-    (GameState(position_one=10, roll_count=10), 6),
-    (GameState(position_one=10, roll_count=1000), 6),
-    (GameState(position_one=3, roll_count=123), 8),
-])
+@pytest.mark.parametrize(
+    "initial_game_state, expected",
+    [
+        (GameState(position_one=1, roll_count=0), 7),
+        (GameState(position_one=10, roll_count=0), 6),
+        (GameState(position_one=10, roll_count=10), 6),
+        (GameState(position_one=10, roll_count=1000), 6),
+        (GameState(position_one=3, roll_count=123), 8),
+    ],
+)
 def test_position_one_updated(initial_game_state, expected):
     assert one_turn(initial_game_state).position_one == expected
 
 
-@pytest.mark.parametrize("initial_game_state, expected", [
-    (GameState(position_one=1, roll_count=0, score_one=0), 7),
-    (GameState(position_one=1, roll_count=0, score_one=10), 17),
-    (GameState(position_one=3, roll_count=123, score_one=123), 131),
-])
+@pytest.mark.parametrize(
+    "initial_game_state, expected",
+    [
+        (GameState(position_one=1, roll_count=0, score_one=0), 7),
+        (GameState(position_one=1, roll_count=0, score_one=10), 17),
+        (GameState(position_one=3, roll_count=123, score_one=123), 131),
+    ],
+)
 def test_score_one_updated(initial_game_state, expected):
     assert one_turn(initial_game_state).score_one == expected
 
@@ -46,13 +55,29 @@ def test_player_one_not_updated_on_player_two_turn():
     assert next_game_state.position_one == initial_game_state.position_one
 
 
+@pytest.mark.parametrize(
+    "initial_player_turn, expected",
+    [
+        (1, 2),
+        (2, 1),
+    ],
+)
+def test_turn_alternates(initial_player_turn, expected):
+    assert one_turn(GameState(player_turn=initial_player_turn)).player_turn == expected
+
+
 def one_turn(initial_game_state: GameState) -> GameState:
     if initial_game_state.player_turn == 1:
         new_position_one = calculate_new_position_one(initial_game_state)
         new_score_one = initial_game_state.score_one + new_position_one
-        return GameState(roll_count=initial_game_state.roll_count+3, position_one=new_position_one, score_one=new_score_one)
+        return GameState(
+            roll_count=initial_game_state.roll_count + 3,
+            position_one=new_position_one,
+            score_one=new_score_one,
+            player_turn=2,
+        )
     else:
-        return initial_game_state
+        return initial_game_state._replace(player_turn=1)
 
 
 def calculate_new_position_one(initial_game_state):
@@ -62,7 +87,7 @@ def calculate_new_position_one(initial_game_state):
 
 
 def special_mod10(number: int) -> int:
-    return (number-1) % 10 + 1
+    return (number - 1) % 10 + 1
 
 
 def part_a(filepath: str):
