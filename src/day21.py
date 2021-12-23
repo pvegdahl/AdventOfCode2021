@@ -10,11 +10,7 @@ class PlayerState(NamedTuple):
     score: int = 0
 
     def one_quantum_turn(self) -> Dict["PlayerState", int]:
-        result = defaultdict(lambda: 0)
-        for roll, count in roll_histogram().items():
-            player_state = self.one_roll(roll)
-            result[player_state] += count
-        return result
+        return {self.one_roll(roll): count for roll, count in roll_histogram().items()}
 
     def one_roll(self, roll: int) -> "PlayerState":
         new_pos = special_mod10(self.position + roll)
