@@ -21,13 +21,17 @@ class GameState(NamedTuple):
     def score_one(self):
         return self.the_score_one
 
+    @classmethod
+    def factory(cls, pos_one: int = 1, score_one: int = 0, roll_count: int = 0, player_turn: int = 1):
+        return GameState(the_position_one=pos_one, the_score_one=score_one, roll_count=roll_count, player_turn=player_turn, player_states=(PlayerState(position=pos_one, score=score_one)))
+
 
 @pytest.mark.parametrize(
     "initial_game_state, expected",
     [
-        (GameState(roll_count=0), 3),
-        (GameState(roll_count=3), 6),
-        (GameState(roll_count=369), 372),
+        (GameState.factory(roll_count=0), 3),
+        (GameState.factory(roll_count=3), 6),
+        (GameState.factory(roll_count=369), 372),
     ],
 )
 def test_roll_count_updated(initial_game_state, expected):
@@ -37,11 +41,11 @@ def test_roll_count_updated(initial_game_state, expected):
 @pytest.mark.parametrize(
     "initial_game_state, expected",
     [
-        (GameState(the_position_one=1, roll_count=0), 7),
-        (GameState(the_position_one=10, roll_count=0), 6),
-        (GameState(the_position_one=10, roll_count=10), 6),
-        (GameState(the_position_one=10, roll_count=1000), 6),
-        (GameState(the_position_one=3, roll_count=123), 8),
+        (GameState.factory(pos_one=1, roll_count=0), 7),
+        (GameState.factory(pos_one=10, roll_count=0), 6),
+        (GameState.factory(pos_one=10, roll_count=10), 6),
+        (GameState.factory(pos_one=10, roll_count=1000), 6),
+        (GameState.factory(pos_one=3, roll_count=123), 8),
     ],
 )
 def test_position_one_updated(initial_game_state, expected):
@@ -51,9 +55,9 @@ def test_position_one_updated(initial_game_state, expected):
 @pytest.mark.parametrize(
     "initial_game_state, expected",
     [
-        (GameState(the_position_one=1, roll_count=0, the_score_one=0), 7),
-        (GameState(the_position_one=1, roll_count=0, the_score_one=10), 17),
-        (GameState(the_position_one=3, roll_count=123, the_score_one=123), 131),
+        (GameState.factory(pos_one=1, roll_count=0, score_one=0), 7),
+        (GameState.factory(pos_one=1, roll_count=0, score_one=10), 17),
+        (GameState.factory(pos_one=3, roll_count=123, score_one=123), 131),
     ],
 )
 def test_score_one_updated(initial_game_state, expected):
@@ -61,7 +65,7 @@ def test_score_one_updated(initial_game_state, expected):
 
 
 def test_player_one_not_updated_on_player_two_turn():
-    initial_game_state = GameState(player_turn=2)
+    initial_game_state = GameState.factory(player_turn=2)
     next_game_state = one_turn(initial_game_state)
     assert next_game_state.score_one() == initial_game_state.score_one()
     assert next_game_state.position_one() == initial_game_state.position_one()
@@ -75,17 +79,17 @@ def test_player_one_not_updated_on_player_two_turn():
     ],
 )
 def test_turn_alternates(initial_player_turn, expected):
-    assert one_turn(GameState(player_turn=initial_player_turn)).player_turn == expected
+    assert one_turn(GameState.factory(player_turn=initial_player_turn)).player_turn == expected
 
 
 def one_turn(initial_game_state: GameState) -> GameState:
     if initial_game_state.player_turn == 1:
         new_position_one = calculate_new_position_one(initial_game_state)
         new_score_one = initial_game_state.score_one() + new_position_one
-        return GameState(
+        return GameState.factory(
             roll_count=initial_game_state.roll_count + 3,
-            the_position_one=new_position_one,
-            the_score_one=new_score_one,
+            pos_one=new_position_one,
+            score_one=new_score_one,
             player_turn=2,
         )
     else:
