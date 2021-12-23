@@ -99,33 +99,38 @@ def test_turn_alternates(initial_player_turn, expected):
 
 
 def one_turn(initial_game_state: GameState) -> GameState:
-    result_player_states = []
-    for i in range(len(initial_game_state.player_states)):
-        if i == initial_game_state.player_turn:
-            result_player_states.append(calculate_new_player_state(initial_game_state, i))
-        else:
-            result_player_states.append(initial_game_state.player_states[i])
     return GameState(
         roll_count=calculate_new_roll_count(initial_game_state),
-        player_states=tuple(result_player_states),
-        player_turn=(initial_game_state.player_turn+1) % 2)
+        player_states=calculate_new_player_states(initial_game_state),
+        player_turn=calculate_new_player_turn(initial_game_state))
 
 
 def calculate_new_roll_count(initial_game_state):
     return initial_game_state.roll_count + 3
 
 
+def calculate_new_player_states(game_state: GameState) -> Tuple[PlayerState]:
+    return tuple(calculate_new_player_state(game_state, i) for i in range(len(game_state.player_states)))
+
+
+def calculate_new_player_turn(game_state: GameState) -> int:
+    return (game_state.player_turn + 1) % 2
+
+
+def calculate_new_player_state(game_state: GameState, player_id: int) -> PlayerState:
+    if game_state.player_turn == player_id:
+        player_state = game_state.player_states[player_id]
+        new_position = calculate_new_position(current_position=player_state.position, roll_count=game_state.roll_count)
+        new_score = player_state.score + new_position
+        return PlayerState(position=new_position, score=new_score)
+    else:
+        return game_state.player_states[player_id]
+
+
 def calculate_new_position(current_position: int, roll_count: int):
     roll_total = 3 * roll_count + 6
     new_position = special_mod10(current_position + roll_total)
     return new_position
-
-
-def calculate_new_player_state(game_state: GameState, player_id: int) -> PlayerState:
-    player_state = game_state.player_states[player_id]
-    new_position = calculate_new_position(current_position=player_state.position, roll_count=game_state.roll_count)
-    new_score = player_state.score + new_position
-    return PlayerState(position=new_position, score=new_score)
 
 
 def special_mod10(number: int) -> int:
