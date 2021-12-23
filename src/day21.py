@@ -7,6 +7,7 @@ class GameState(NamedTuple):
     roll_count: int = 0
     position_one: int = 1
     score_one: int = 0
+    player_turn: int = 1
 
 
 @pytest.mark.parametrize("initial_game_state, expected", [
@@ -38,10 +39,20 @@ def test_score_one_updated(initial_game_state, expected):
     assert one_turn(initial_game_state).score_one == expected
 
 
+def test_player_one_not_updated_on_player_two_turn():
+    initial_game_state = GameState(player_turn=2)
+    next_game_state = one_turn(initial_game_state)
+    assert next_game_state.score_one == initial_game_state.score_one
+    assert next_game_state.position_one == initial_game_state.position_one
+
+
 def one_turn(initial_game_state: GameState) -> GameState:
-    new_position_one = calculate_new_position_one(initial_game_state)
-    new_score_one = initial_game_state.score_one + new_position_one
-    return GameState(roll_count=initial_game_state.roll_count+3, position_one=new_position_one, score_one=new_score_one)
+    if initial_game_state.player_turn == 1:
+        new_position_one = calculate_new_position_one(initial_game_state)
+        new_score_one = initial_game_state.score_one + new_position_one
+        return GameState(roll_count=initial_game_state.roll_count+3, position_one=new_position_one, score_one=new_score_one)
+    else:
+        return initial_game_state
 
 
 def calculate_new_position_one(initial_game_state):
