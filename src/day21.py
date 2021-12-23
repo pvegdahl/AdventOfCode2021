@@ -10,20 +10,28 @@ class PlayerState(NamedTuple):
 
 class GameState(NamedTuple):
     roll_count: int = 0
-    player_states: Tuple[PlayerState] = PlayerState(),
-    the_position_one: int = 1
-    the_score_one: int = 0
+    player_states: Tuple[PlayerState] = (PlayerState(),)
     player_turn: int = 1
 
     def position_one(self):
-        return self.the_position_one
+        return self.player_states[0].position
 
     def score_one(self):
-        return self.the_score_one
+        return self.player_states[0].score
 
     @classmethod
-    def factory(cls, pos_one: int = 1, score_one: int = 0, roll_count: int = 0, player_turn: int = 1):
-        return GameState(the_position_one=pos_one, the_score_one=score_one, roll_count=roll_count, player_turn=player_turn, player_states=(PlayerState(position=pos_one, score=score_one)))
+    def factory(
+        cls,
+        pos_one: int = 1,
+        score_one: int = 0,
+        roll_count: int = 0,
+        player_turn: int = 1,
+    ):
+        return GameState(
+            roll_count=roll_count,
+            player_turn=player_turn,
+            player_states=(PlayerState(position=pos_one, score=score_one),),
+        )
 
 
 @pytest.mark.parametrize(
@@ -79,7 +87,10 @@ def test_player_one_not_updated_on_player_two_turn():
     ],
 )
 def test_turn_alternates(initial_player_turn, expected):
-    assert one_turn(GameState.factory(player_turn=initial_player_turn)).player_turn == expected
+    assert (
+        one_turn(GameState.factory(player_turn=initial_player_turn)).player_turn
+        == expected
+    )
 
 
 def one_turn(initial_game_state: GameState) -> GameState:
