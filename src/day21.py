@@ -10,7 +10,7 @@ class PlayerState(NamedTuple):
 
 class GameState(NamedTuple):
     roll_count: int = 0
-    player_states: Tuple[PlayerState] = (PlayerState(),)
+    player_states: Tuple[PlayerState, ...] = (PlayerState(),)
     player_turn: int = 0
 
     def position_zero(self):
@@ -24,14 +24,23 @@ class GameState(NamedTuple):
         cls,
         pos_zero: int = 1,
         score_zero: int = 0,
+        pos_one: int = 1,
+        score_one: int = 0,
         roll_count: int = 0,
         player_turn: int = 0,
     ):
         return GameState(
             roll_count=roll_count,
             player_turn=player_turn,
-            player_states=(PlayerState(position=pos_zero, score=score_zero),),
+            player_states=(
+                PlayerState(position=pos_zero, score=score_zero),
+                PlayerState(position=pos_one, score=score_one),
+            ),
         )
+
+    def game_score(self) -> int:
+        min_score = min(player.score for player in self.player_states)
+        return min_score * self.roll_count
 
 
 @pytest.mark.parametrize(
@@ -102,7 +111,8 @@ def one_turn(initial_game_state: GameState) -> GameState:
     return GameState(
         roll_count=calculate_new_roll_count(initial_game_state),
         player_states=calculate_new_player_states(initial_game_state),
-        player_turn=calculate_new_player_turn(initial_game_state))
+        player_turn=calculate_new_player_turn(initial_game_state),
+    )
 
 
 def calculate_new_roll_count(initial_game_state):
@@ -110,7 +120,10 @@ def calculate_new_roll_count(initial_game_state):
 
 
 def calculate_new_player_states(game_state: GameState) -> Tuple[PlayerState]:
-    return tuple(calculate_new_player_state(game_state, i) for i in range(len(game_state.player_states)))
+    return tuple(
+        calculate_new_player_state(game_state, i)
+        for i in range(len(game_state.player_states))
+    )
 
 
 def calculate_new_player_turn(game_state: GameState) -> int:
@@ -120,7 +133,9 @@ def calculate_new_player_turn(game_state: GameState) -> int:
 def calculate_new_player_state(game_state: GameState, player_id: int) -> PlayerState:
     if game_state.player_turn == player_id:
         player_state = game_state.player_states[player_id]
-        new_position = calculate_new_position(current_position=player_state.position, roll_count=game_state.roll_count)
+        new_position = calculate_new_position(
+            current_position=player_state.position, roll_count=game_state.roll_count
+        )
         new_score = player_state.score + new_position
         return PlayerState(position=new_position, score=new_score)
     else:
@@ -137,18 +152,70 @@ def special_mod10(number: int) -> int:
     return (number - 1) % 10 + 1
 
 
-def part_a(filepath: str):
-    with open(filepath, "r") as file:
-        pass
+def run_turns_until_score(game_state: GameState, target_score: int) -> GameState:
+    while not score_reached(game_state, target_score):
+        game_state = one_turn(game_state)
+    return game_state
 
 
-def part_b(filepath: str):
-    with open(filepath, "r") as file:
-        pass
+def score_reached(game_state, target_score):
+    for player in game_state.player_states:
+        if player.score >= target_score:
+            return True
+    return False
+
+
+def test_run_turns_until_score():
+    game_state = GameState(
+        player_states=(PlayerState(position=4), PlayerState(position=8))
+    )
+    final_state = run_turns_until_score(game_state, 1000)
+    assert final_state == GameState(
+        roll_count=993,
+        player_turn=1,
+        player_states=(
+            PlayerState(position=10, score=1000),
+            PlayerState(position=3, score=745),
+        ),
+    )
+
+
+@pytest.mark.parametrize(
+    "game_state, expected",
+    [
+        (GameState(), 0),
+        (GameState.factory(score_zero=3, score_one=5, roll_count=4), 12),
+        (
+            GameState(
+                roll_count=993,
+                player_turn=1,
+                player_states=(
+                    PlayerState(position=10, score=1000),
+                    PlayerState(position=3, score=745),
+                ),
+            ),
+            739785,
+        ),
+    ],
+)
+def test_game_score(game_state, expected):
+    assert game_state.game_score() == expected
+
+
+def aoc_input() -> GameState:
+    return GameState.factory(pos_zero=10, pos_one=8)
+
+
+def part_a():
+    final_game_state = run_turns_until_score(game_state=aoc_input(), target_score=1000)
+    return final_game_state.game_score()
+
+
+def part_b():
+    pass
 
 
 if __name__ == "__main__":
     day = 21
-    input_file = f"../puzzle_input/day{day}.txt"
-    print(f"The answer to {day}A is: {part_a(input_file)}")
-    print(f"The answer to {day}B is: {part_b(input_file)}")
+    print(f"The answer to {day}A is: {part_a()}")
+    print(f"The answer to {day}B is: {part_b()}")
