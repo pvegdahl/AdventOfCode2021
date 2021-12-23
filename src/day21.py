@@ -12,11 +12,14 @@ class GameState(NamedTuple):
     roll_count: int = 0
     player_states: Tuple[PlayerState] = PlayerState(),
     the_position_one: int = 1
-    score_one: int = 0
+    the_score_one: int = 0
     player_turn: int = 1
 
     def position_one(self):
         return self.the_position_one
+
+    def score_one(self):
+        return self.the_score_one
 
 
 @pytest.mark.parametrize(
@@ -48,19 +51,19 @@ def test_position_one_updated(initial_game_state, expected):
 @pytest.mark.parametrize(
     "initial_game_state, expected",
     [
-        (GameState(the_position_one=1, roll_count=0, score_one=0), 7),
-        (GameState(the_position_one=1, roll_count=0, score_one=10), 17),
-        (GameState(the_position_one=3, roll_count=123, score_one=123), 131),
+        (GameState(the_position_one=1, roll_count=0, the_score_one=0), 7),
+        (GameState(the_position_one=1, roll_count=0, the_score_one=10), 17),
+        (GameState(the_position_one=3, roll_count=123, the_score_one=123), 131),
     ],
 )
 def test_score_one_updated(initial_game_state, expected):
-    assert one_turn(initial_game_state).score_one == expected
+    assert one_turn(initial_game_state).score_one() == expected
 
 
 def test_player_one_not_updated_on_player_two_turn():
     initial_game_state = GameState(player_turn=2)
     next_game_state = one_turn(initial_game_state)
-    assert next_game_state.score_one == initial_game_state.score_one
+    assert next_game_state.score_one() == initial_game_state.score_one()
     assert next_game_state.position_one() == initial_game_state.position_one()
 
 
@@ -78,11 +81,11 @@ def test_turn_alternates(initial_player_turn, expected):
 def one_turn(initial_game_state: GameState) -> GameState:
     if initial_game_state.player_turn == 1:
         new_position_one = calculate_new_position_one(initial_game_state)
-        new_score_one = initial_game_state.score_one + new_position_one
+        new_score_one = initial_game_state.score_one() + new_position_one
         return GameState(
             roll_count=initial_game_state.roll_count + 3,
             the_position_one=new_position_one,
-            score_one=new_score_one,
+            the_score_one=new_score_one,
             player_turn=2,
         )
     else:
