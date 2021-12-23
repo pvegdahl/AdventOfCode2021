@@ -1,4 +1,6 @@
-from typing import NamedTuple, Tuple, List
+import functools
+from collections import defaultdict
+from typing import NamedTuple, Tuple, List, Dict
 
 import pytest
 
@@ -15,6 +17,18 @@ class PlayerState(NamedTuple):
             result.append(PlayerState(position=new_pos, score=new_score))
         return result
 
+    def one_quantum_turn(self) -> Dict["PlayerState", int]:
+        result = defaultdict(lambda: 0)
+        for roll, count in roll_histogram().items():
+            player_state = self.one_roll(roll)
+            result[player_state] += count
+        return result
+
+    def one_roll(self, roll: int) -> "PlayerState":
+        new_pos = special_mod10(self.position + roll)
+        new_score = self.score + new_pos
+        return PlayerState(position=new_pos, score=new_score)
+
 
 @pytest.mark.parametrize("player_state, expected", [
     (PlayerState(), [PlayerState(position=2, score=2), PlayerState(position=3, score=3), PlayerState(position=4, score=4)]),
@@ -23,6 +37,35 @@ class PlayerState(NamedTuple):
 ])
 def test_one_quantum_roll(player_state, expected):
     assert player_state.one_quantum_roll() == expected
+
+
+@functools.cache
+def roll_histogram():
+    result = {0: 1}
+    for _ in range(3):
+        old_result = result
+        result = defaultdict(lambda: 0)
+        for key, value in old_result.items():
+            for i in (1, 2, 3):
+                new_key = key + i
+                result[new_key] += value
+    return result
+
+
+def test_roll_histogram():
+    assert roll_histogram() == {3: 1, 4: 3, 5: 6, 6: 7, 7: 6, 8: 3, 9: 1}
+
+
+def test_one_quantum_turn():
+    assert PlayerState(position=5, score=0).one_quantum_turn() == {
+        PlayerState(position=8, score=8): 1,
+        PlayerState(position=9, score=9): 3,
+        PlayerState(position=10, score=10): 6,
+        PlayerState(position=1, score=1): 7,
+        PlayerState(position=2, score=2): 6,
+        PlayerState(position=3, score=3): 3,
+        PlayerState(position=4, score=4): 1,
+    }
 
 
 class GameState(NamedTuple):
