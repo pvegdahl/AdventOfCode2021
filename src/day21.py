@@ -47,6 +47,98 @@ def test_one_quantum_turn():
     }
 
 
+def dict_quantum_turns(player_states: Dict[PlayerState, int]) -> Dict[PlayerState, int]:
+    result = defaultdict(lambda: 0)
+    for ps, count_a in player_states.items():
+        new_player_states = ps.one_quantum_turn()
+        for new_ps, count_b in new_player_states.items():
+            result[new_ps] += count_a * count_b
+    return result
+
+
+def test_dict_quantum_turn():
+    initial_states = {PlayerState(5, 0): 2, PlayerState(3, 0): 1}
+    expected = {
+        PlayerState(position=6, score=6): 1,
+        PlayerState(position=7, score=7): 3,
+        PlayerState(position=8, score=8): 8,
+        PlayerState(position=9, score=9): 13,
+        PlayerState(position=10, score=10): 18,
+        PlayerState(position=1, score=1): 17,
+        PlayerState(position=2, score=2): 13,
+        PlayerState(position=3, score=3): 6,
+        PlayerState(position=4, score=4): 2,
+    }
+    assert dict_quantum_turns(initial_states) == expected
+
+
+class CompleteVsNotCount(NamedTuple):
+    complete_count: int
+    not_yet_count: int
+
+
+def winning_turn_histogram(player_state: PlayerState) -> Dict[int, CompleteVsNotCount]:
+    winning_score = 21
+    player_states = {player_state: 1}
+    winning_turns = defaultdict(lambda: CompleteVsNotCount(0, 0))
+    winning_turns[0] = CompleteVsNotCount(0, 1)
+    current_turn = 0
+    while player_states:
+        current_turn += 1
+        new_player_states = dict_quantum_turns(player_states)
+        winning_states = {
+            state: count
+            for state, count in new_player_states.items()
+            if state.score >= winning_score
+        }
+        player_states = {
+            state: count
+            for state, count in new_player_states.items()
+            if state.score < winning_score
+        }
+        complete_count = sum(winning_states.values())
+        not_yet_count = sum(player_states.values())
+        winning_turns[current_turn] = CompleteVsNotCount(
+            complete_count=complete_count, not_yet_count=not_yet_count
+        )
+    return winning_turns
+
+
+def calculate_wins_from_histograms(
+    player_zero_histogram: Dict[int, CompleteVsNotCount],
+    player_one_histogram: Dict[int, CompleteVsNotCount],
+) -> Tuple[int, int]:
+    p0_wins = 0
+    for p0_turn, p0_stats in player_zero_histogram.items():
+        p0_wins += (
+            p0_stats.complete_count * player_one_histogram[p0_turn - 1].not_yet_count
+        )
+
+    p1_wins = 0
+    for p1_turn, p1_stats in player_one_histogram.items():
+        p1_wins += (
+            p1_stats.complete_count * player_zero_histogram[p1_turn].not_yet_count
+        )
+    return p0_wins, p1_wins
+
+
+def calculate_per_player_wins(
+    p0_state: PlayerState, p1_state: PlayerState
+) -> Tuple[int, int]:
+    p0_histogram = winning_turn_histogram(p0_state)
+    p1_histogram = winning_turn_histogram(p1_state)
+    return calculate_wins_from_histograms(p0_histogram, p1_histogram)
+
+
+def test_calculate_per_player_wins():
+    p0_state = PlayerState(position=4)
+    p1_state = PlayerState(position=8)
+    assert calculate_per_player_wins(p0_state, p1_state) == (
+        444356092776315,
+        341960390180808,
+    )
+
+
 class GameState(NamedTuple):
     roll_count: int = 0
     player_states: Tuple[PlayerState, ...] = (PlayerState(),)
@@ -251,7 +343,11 @@ def part_a():
 
 
 def part_b():
-    pass
+    return max(
+        calculate_per_player_wins(
+            p0_state=aoc_input().player_states[0], p1_state=aoc_input().player_states[1]
+        )
+    )
 
 
 if __name__ == "__main__":
